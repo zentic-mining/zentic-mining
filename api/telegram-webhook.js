@@ -19,25 +19,42 @@ export default async function handler(req, res) {
 
   try {
     // Confirm the checkout request.
-    if (update.pre_checkout_query) {
-      const query = update.pre_checkout_query;
+if (update.pre_checkout_query) {
+  const query = update.pre_checkout_query;
 
-      await fetch(
-        `https://api.telegram.org/bot${token}/answerPreCheckoutQuery`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            pre_checkout_query_id: query.id,
-            ok: true,
-          }),
-        }
-      );
+  const validPayments = {
+    zentic_iron_axe: 100,
+    zentic_steel_axe: 500,
+  };
 
-      return res.status(200).json({ ok: true });
+  const expectedAmount = validPayments[query.invoice_payload];
+
+  const isValid =
+    query.currency === "XTR" &&
+    expectedAmount !== undefined &&
+    query.total_amount === expectedAmount;
+
+  await fetch(
+    `https://api.telegram.org/bot${token}/answerPreCheckoutQuery`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pre_checkout_query_id: query.id,
+        ok: isValid,
+        ...(isValid
+          ? {}
+          : {
+              error_message: "Payment details are invalid.",
+            }),
+      }),
     }
+  );
+
+  return res.status(200).json({ ok: true });
+}
 
     // Process a completed Telegram Stars payment.
     const payment = update.message?.successful_payment;
