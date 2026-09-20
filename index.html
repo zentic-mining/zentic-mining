@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zentic Mining</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #9ca3af;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #1f2937;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    .price {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 12px 0 18px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #f59e0b;
+      color: #111827;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 20px;
+      min-height: 24px;
+      color: #d1d5db;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Zentic Mining</h1>
+    <div class="subtitle">Upgrade your mining equipment</div>
+
+    <div class="card">
+      <h2>Iron Axe</h2>
+      <div class="price">100 Stars</div>
+      <button onclick="buyItem('iron_axe', this)">
+        Buy Iron Axe
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Steel Axe</h2>
+      <div class="price">500 Stars</div>
+      <button onclick="buyItem('steel_axe', this)">
+        Buy Steel Axe
+      </button>
+    </div>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
+    tg.expand();
+
+    async function buyItem(item, button) {
+      const status = document.getElementById("status");
+
+      button.disabled = true;
+      status.textContent = "Preparing payment...";
+
+      try {
+        const response = await fetch("/api/create-invoice", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            item: item
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to create invoice");
+        }
+
+        status.textContent = "Invoice ready.";
+
+        tg.openInvoice(data.invoice_url, function(result) {
+          if (result === "paid") {
+            status.textContent = "Payment completed successfully.";
+          } else if (result === "cancelled") {
+            status.textContent = "Payment was cancelled.";
+          } else if (result === "failed") {
+            status.textContent = "Payment failed.";
+          } else {
+            status.textContent = "Payment status: " + result;
+          }
+
+          button.disabled = false;
+        });
+
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Unable to start payment.";
+        button.disabled = false;
+      }
+    }
+  </script>
+</body>
+  </html>
