@@ -9,11 +9,12 @@ export default async function handler(req, res) {
   const databaseUrl = process.env.DATABASE_URL;
 
   if (!token || !databaseUrl) {
-    return res.status(500).json({
-      error: "Server configuration is incomplete",
-    });
+  return res.status(500).json({
+    error: "Server configuration is incomplete",
+    telegram_token_configured: Boolean(token),
+    database_url_configured: Boolean(databaseUrl),
+  });
   }
-
   const sql = neon(databaseUrl);
   const update = req.body;
 
