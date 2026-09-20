@@ -25,9 +25,12 @@ export default async function handler(req, res) {
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN;
-
+console.log("Telegram token configured:", Boolean(token));
   if (!token) {
-    return res.status(500).json({ error: "Telegram bot token is not configured" });
+  return res.status(500).json({
+    error: "Telegram bot token is not configured",
+    telegram_token_configured: false
+  });
   }
 
   const response = await fetch(
