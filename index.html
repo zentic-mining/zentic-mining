@@ -93,7 +93,9 @@
         Buy Steel Axe
       </button>
     </div>
-
+<button onclick="testTelegramAuth()">
+  Test Telegram Auth
+</button>
     <div id="status"></div>
   </div>
 
@@ -102,7 +104,39 @@
 
     tg.ready();
     tg.expand();
+async function testTelegramAuth() {
+  const status = document.getElementById("status");
 
+  status.textContent = "Checking Telegram authentication...";
+
+  try {
+    const response = await fetch("/api/test-telegram-auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        initData: tg.initData
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Telegram authentication failed");
+    }
+
+    status.textContent =
+      "Telegram Auth OK. User ID: " + data.telegram_user_id;
+
+    console.log("Telegram Auth Result:", data);
+
+  } catch (error) {
+    console.error(error);
+    status.textContent =
+      "Telegram Auth Failed: " + error.message;
+  }
+}
     async function buyItem(item, button) {
       const status = document.getElementById("status");
 
