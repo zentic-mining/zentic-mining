@@ -79,6 +79,14 @@
     <div class="subtitle">Upgrade your mining equipment</div>
 
     <div class="card">
+  <h2>Stone Axe</h2>
+  <div class="price">50,000 Zentic</div>
+  <button id="startMiningButton" onclick="startMining()">
+    START MINING
+  </button>
+    </div>
+    
+    <div class="card">
       <h2>Iron Axe</h2>
       <div class="price">100 Stars</div>
       <button onclick="buyItem('iron_axe', this)">
@@ -182,6 +190,79 @@ async function testTelegramAuth() {
         button.disabled = false;
       }
     }
+    async function startMining() {
+  const status = document.getElementById("status");
+  const button = document.getElementById("startMiningButton");
+
+  button.disabled = true;
+  status.textContent = "Starting mining...";
+
+  try {
+    // Get latest player inventory
+    const playerResponse = await fetch("/api/player", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        initData: tg.initData
+      })
+    });
+
+    const playerData = await playerResponse.json();
+
+    if (!playerResponse.ok) {
+      throw new Error(
+        playerData.error || "Failed to load player"
+      );
+    }
+
+    const stoneAxe = playerData.inventory.find(
+      (item) =>
+        item.item === "stone_axe" &&
+        item.status === "ready"
+    );
+
+    if (!stoneAxe) {
+      throw new Error(
+        "No Stone Axe ready to start mining"
+      );
+    }
+
+    // Start mining
+    const response = await fetch("/api/claim-axe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        initData: tg.initData,
+        inventory_id: stoneAxe.id
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Failed to start mining"
+      );
+    }
+
+    status.textContent =
+      "⛏️ Mining started successfully!";
+
+    console.log("Start Mining Result:", data);
+
+  } catch (error) {
+    console.error(error);
+
+    status.textContent =
+      "Start Mining Failed: " + error.message;
+
+    button.disabled = false;
+  }
+}
         async function testMining() {
       const status = document.getElementById("status");
 
