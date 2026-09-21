@@ -26,89 +26,113 @@ export default async function handler(req, res) {
 
     const sql = neon(databaseUrl);
 
-    const axes = await sql`
-      SELECT
-        id,
-        item,
-        status,
-        claimed_at,
-        expires_at,
-        last_mined_at
-      FROM user_inventory
-      WHERE telegram_user_id = ${telegram_user_id}
-        AND status = 'active'
-      ORDER BY claimed_at ASC
-    `;
+    const result = await sql`
+      WITH axe_data AS (
+        SELECT
+          id,
+          telegram_user_id,
+          item,
+          claimed_at,
+          expires_at,
+          last_mined_at,
+          COALESCE(last_mined_at, claimed_at) AS checkpoint,
+          LEAST(NOW(), expires_at) AS effective_now,
 
-    const ratesPerHour = {
-      stone_axe: 2750 / 24,
-      iron_axe: 100000 / 24,
-      steel_axe: 300000 / 24,
-    };
+          CASE item
+            WHEN 'stone_axe' THEN 2750.0 / 24.0
+            WHEN 'iron_axe' THEN 100000.0 / 24.0
+            WHEN 'steel_axe' THEN 300000.0 / 24.0
+            ELSE 0.0
+          END AS rate_per_hour
 
-    const now = Date.now();
-
-    let totalEarnedZentic = 0;
-
-    for (const axe of axes) {
-      const claimedAt = new Date(axe.claimed_at).getTime();
-      const expiresAt = new Date(axe.expires_at).getTime();
-
-      const lastMinedAt = axe.last_mined_at
-        ? new Date(axe.last_mined_at).getTime()
-        : claimedAt;
-
-      const effectiveNow = Math.min(now, expiresAt);
-
-      const elapsedHours = Math.max(
-        0,
-        (effectiveNow - lastMinedAt) / (1000 * 60 * 60)
-      );
-
-      const ratePerHour = ratesPerHour[axe.item] || 0;
-
-      const earnedZentic = elapsedHours * ratePerHour;
-
-      if (earnedZentic <= 0) {
-        continue;
-      }
-
-      await sql`
-        UPDATE user_inventory
-        SET last_mined_at = TO_TIMESTAMP(${effectiveNow / 1000})
-        WHERE id = ${axe.id}
-          AND telegram_user_id = ${telegram_user_id}
+        FROM user_inventory
+        WHERE telegram_user_id = ${telegram_user_id}
           AND status = 'active'
-      `;
+      ),
 
-      totalEarnedZentic += earnedZentic;
-    }
+      calculated AS (
+        SELECT
+          *,
+          GREATEST(
+            0.0,
+            EXTRACT(
+              EPOCH FROM (effective_now - checkpoint)
+            ) / 3600.0 * rate_per_hour
+          ) AS earned
+        FROM axe_data
+      ),
 
-    if (totalEarnedZentic > 0) {
-      await sql`
+      credits AS (
+        SELECT
+          *,
+          FLOOR(earned) AS whole_zentic
+        FROM calculated
+      ),
+
+      updated_axes AS (
+        UPDATE user_inventory ui
+        SET last_mined_at =
+          c.checkpoint
+          + (
+              c.whole_zentic / NULLIF(c.rate_per_hour, 0)
+            ) * INTERVAL '1 hour'
+
+        FROM credits c
+
+        WHERE ui.id = c.id
+          AND ui.telegram_user_id = ${telegram_user_id}
+          AND ui.status = 'active'
+          AND c.whole_zentic > 0
+          AND ui.last_mined_at IS NOT DISTINCT FROM c.last_mined_at
+
+        RETURNING c.whole_zentic
+      ),
+
+      total_credit AS (
+        SELECT
+          COALESCE(
+            SUM(whole_zentic),
+            0
+          )::BIGINT AS amount
+        FROM updated_axes
+      ),
+
+      balance_update AS (
         INSERT INTO users (
           telegram_user_id,
           zentic_balance
         )
-        VALUES (
+        SELECT
           ${telegram_user_id},
-          ${totalEarnedZentic}
-        )
+          amount
+        FROM total_credit
+        WHERE amount > 0
+
         ON CONFLICT (telegram_user_id)
         DO UPDATE SET
-          zentic_balance = users.zentic_balance + ${totalEarnedZentic},
+          zentic_balance =
+            users.zentic_balance + EXCLUDED.zentic_balance,
           updated_at = NOW()
-      `;
-    }
+
+        RETURNING zentic_balance
+      )
+
+      SELECT
+        amount AS earned_zentic
+      FROM total_credit
+    `;
+
+    const earnedZentic = Number(result[0]?.earned_zentic || 0);
 
     return res.status(200).json({
       success: true,
-      earned_zentic: totalEarnedZentic,
+      earned_zentic: earnedZentic,
     });
-    } catch (error) {
+
+  } catch (error) {
     console.error("Mining error:", error);
 
-    return res.status(500).json({
+      return res.status(500).json({
       error: "Internal server error",
     });
   }
