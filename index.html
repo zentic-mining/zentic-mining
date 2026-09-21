@@ -93,8 +93,8 @@
         Buy Steel Axe
       </button>
     </div>
-<button onclick="testTelegramAuth()">
-  Test Telegram Auth
+<button onclick="testMining()">
+  Test Mining
 </button>
     <div id="status"></div>
   </div>
@@ -180,6 +180,39 @@ async function testTelegramAuth() {
         console.error(error);
         status.textContent = "Unable to start payment.";
         button.disabled = false;
+      }
+    }
+        async function testMining() {
+      const status = document.getElementById("status");
+
+      status.textContent = "Mining...";
+
+      try {
+        const response = await fetch("/api/mine", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            initData: tg.initData
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Mining failed");
+        }
+
+        status.textContent =
+          "Mining OK. Earned: " + data.earned_zentic + " Zentic";
+
+        console.log("Mining Result:", data);
+
+      } catch (error) {
+        console.error(error);
+        status.textContent =
+          "Mining Failed: " + error.message;
       }
     }
   </script>
