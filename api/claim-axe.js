@@ -1,4 +1,5 @@
-import { neon } from "@neondatabase/serverless";
+import { Pool } from "@neondatabase/serverless";
+import { validateTelegramInitData } from "./telegram-auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -15,42 +16,70 @@ export default async function handler(req, res) {
     });
   }
 
-  try {
-    const { telegram_user_id, inventory_id } = req.body || {};
+  const pool = new Pool({
+    connectionString: databaseUrl,
+  });
 
-    if (!telegram_user_id || !inventory_id) {
-      return res.status(400).json({
-        error: "Missing claim information",
+  let client;
+
+  try {
+    const { initData, inventory_id } = req.body || {};
+
+    let telegram_user_id;
+
+    try {
+      const telegramAuth =
+        validateTelegramInitData(initData);
+
+      telegram_user_id =
+        telegramAuth.telegram_user_id;
+    } catch (error) {
+      return res.status(401).json({
+        error:
+          error.message ||
+          "Invalid Telegram authentication",
       });
     }
 
-    const sql = neon(databaseUrl);
+    if (!inventory_id) {
+      return res.status(400).json({
+        error: "Missing inventory ID",
+      });
+    }
 
-    const inventory = await sql`
-      SELECT
-        id,
+    client = await pool.connect();
+
+    const inventoryResult = await client.query(
+      `
+        SELECT
+          id,
+          telegram_user_id,
+          item,
+          status,
+          claimed_at,
+          expires_at
+        FROM user_inventory
+        WHERE id = $1
+          AND telegram_user_id = $2
+        LIMIT 1
+      `,
+      [
+        inventory_id,
         telegram_user_id,
-        item,
-        status,
-        claimed_at,
-        expires_at
-      FROM user_inventory
-      WHERE id = ${inventory_id}
-        AND telegram_user_id = ${telegram_user_id}
-      LIMIT 1
-    `;
+      ]
+    );
 
-    if (inventory.length === 0) {
+    if (inventoryResult.rows.length === 0) {
       return res.status(404).json({
         error: "Axe not found",
       });
     }
 
-    const axe = inventory[0];
+    const axe = inventoryResult.rows[0];
 
     if (axe.status !== "ready") {
       return res.status(400).json({
-        error: "Axe is not available for claiming",
+        error: "Axe is not ready to start mining",
       });
     }
 
@@ -68,38 +97,59 @@ export default async function handler(req, res) {
       });
     }
 
-    const claimed = await sql`
-      UPDATE user_inventory
-      SET
-        status = 'active',
-        claimed_at = NOW(),
-        expires_at = NOW() + (${days} * INTERVAL '1 day')
-      WHERE id = ${inventory_id}
-        AND telegram_user_id = ${telegram_user_id}
-        AND status = 'ready'
-      RETURNING
-        id,
-        item,
-        status,
-        claimed_at,
-        expires_at
-    `;
+    const started = await client.query(
+      `
+        UPDATE user_inventory
 
-    if (claimed.length === 0) {
+        SET
+          status = 'active',
+          claimed_at = NOW(),
+          expires_at =
+            NOW() + ($1 * INTERVAL '1 day'),
+          last_mined_at = NOW(),
+          mining_remainder = 0
+
+        WHERE id = $2
+          AND telegram_user_id = $3
+          AND status = 'ready'
+
+        RETURNING
+          id,
+          item,
+          status,
+          claimed_at,
+          expires_at,
+          last_mined_at,
+          mining_remainder
+      `,
+      [
+        days,
+        inventory_id,
+        telegram_user_id,
+      ]
+    );
+
+    if (started.rows.length === 0) {
       return res.status(409).json({
-        error: "Axe could not be claimed",
+        error: "Axe could not be started",
       });
     }
 
     return res.status(200).json({
       success: true,
-      axe: claimed[0],
+      axe: started.rows[0],
     });
-    } catch (error) {
-    console.error("Claim Axe error:", error);
+  } catch (error) {
+    console.error("Start Mining error:", error);
 
     return res.status(500).json({
       error: "Internal server error",
     });
+  } finally {
+    if (client) {
+      client.release();
+    }
+
+    await pool.end();
   }
 }
