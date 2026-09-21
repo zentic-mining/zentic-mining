@@ -43,6 +43,89 @@ export default async function handler(req, res) {
     client = await pool.connect();
 
     await client.query("BEGIN");
+        // Create player if this is a new Telegram user
+    await client.query(
+      `
+        INSERT INTO users (
+          telegram_user_id,
+          zentic_balance,
+          starter_claimed
+        )
+        VALUES (
+          $1,
+          0,
+          false
+        )
+        ON CONFLICT (telegram_user_id)
+        DO NOTHING
+      `,
+      [telegram_user_id]
+    );
+
+    // Give the player one starter Stone Axe
+    // only if they have not received the starter pack yet.
+    const starterResult = await client.query(
+      `
+        SELECT starter_claimed
+        FROM users
+        WHERE telegram_user_id = $1
+        FOR UPDATE
+      `,
+      [telegram_user_id]
+    );
+
+    if (
+      starterResult.rows.length > 0 &&
+      starterResult.rows[0].starter_claimed === false
+    ) {
+      const existingStoneAxe = await client.query(
+        `
+          SELECT id
+          FROM user_inventory
+          WHERE telegram_user_id = $1
+            AND item = 'stone_axe'
+          LIMIT 1
+        `,
+        [telegram_user_id]
+      );
+
+      if (existingStoneAxe.rows.length === 0) {
+        await client.query(
+          `
+            INSERT INTO user_inventory (
+              telegram_user_id,
+              item,
+              status,
+              claimed_at,
+              expires_at,
+              last_mined_at,
+              mining_remainder
+            )
+            VALUES (
+              $1,
+              'stone_axe',
+              'ready',
+              NULL,
+              NULL,
+              NULL,
+              0
+            )
+          `,
+          [telegram_user_id]
+        );
+      }
+
+      await client.query(
+        `
+          UPDATE users
+          SET
+            starter_claimed = true,
+            updated_at = NOW()
+          WHERE telegram_user_id = $1
+        `,
+        [telegram_user_id]
+      );
+    }
 
     const inventoryResult = await client.query(
       `
