@@ -18,7 +18,9 @@ export default async function handler(req, res) {
   const update = req.body;
 
   try {
-    // Confirm the checkout request.
+    // --------------------------------------------------
+    // PRE-CHECKOUT
+    // --------------------------------------------------
     if (update.pre_checkout_query) {
       const query = update.pre_checkout_query;
 
@@ -56,7 +58,9 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // Process a completed Telegram Stars payment.
+    // --------------------------------------------------
+    // SUCCESSFUL PAYMENT
+    // --------------------------------------------------
     const payment = update.message?.successful_payment;
 
     if (payment) {
@@ -75,13 +79,13 @@ export default async function handler(req, res) {
         });
       }
 
-      const stars = payment.total_amount;
-      const chargeId = payment.telegram_payment_charge_id;
-
       const expectedStars = {
         iron_axe: 100,
         steel_axe: 500,
       };
+
+      const stars = payment.total_amount;
+      const chargeId = payment.telegram_payment_charge_id;
 
       if (stars !== expectedStars[item]) {
         return res.status(400).json({
@@ -89,6 +93,19 @@ export default async function handler(req, res) {
         });
       }
 
+      // Make sure the Telegram user exists.
+      await sql`
+        INSERT INTO users (
+          telegram_user_id
+        )
+        VALUES (
+          ${userId}
+        )
+        ON CONFLICT (telegram_user_id)
+        DO NOTHING
+      `;
+
+      // Record the purchase.
       const insertedPurchase = await sql`
         INSERT INTO purchases (
           telegram_user_id,
@@ -106,32 +123,35 @@ export default async function handler(req, res) {
           ${payload},
           'completed'
         )
-        ON CONFLICT (telegram_payment_charge_id) DO NOTHING
+        ON CONFLICT (telegram_payment_charge_id)
+        DO NOTHING
         RETURNING id
       `;
 
+      // Only create the Axe if this is a new payment.
       if (insertedPurchase.length > 0) {
         await sql`
           INSERT INTO user_inventory (
             telegram_user_id,
             item,
-            quantity
+            status
           )
           VALUES (
             ${userId},
             ${item},
-            1
+            'ready'
           )
-          ON CONFLICT (telegram_user_id, item)
-          DO UPDATE SET quantity = user_inventory.quantity + 1
         `;
       }
 
       return res.status(200).json({ ok: true });
     }
 
+    // --------------------------------------------------
+    // OTHER TELEGRAM UPDATES
+    // --------------------------------------------------
     return res.status(200).json({ ok: true });
-    } catch (error) {
+  } catch (error) {
     console.error("Telegram webhook error:", error);
 
     return res.status(500).json({
