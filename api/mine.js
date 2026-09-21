@@ -19,12 +19,7 @@ export default async function handler(req, res) {
     connectionString: databaseUrl,
   });
 
-  let client;
-
-  try {
-    const { initData } = req.body || {};
-
-let telegram_user_id;
+let client;
 
 try {
   const { initData } = req.body || {};
