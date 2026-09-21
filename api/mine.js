@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import { Pool } from "@neondatabase/serverless";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -15,6 +15,12 @@ export default async function handler(req, res) {
     });
   }
 
+  const pool = new Pool({
+    connectionString: databaseUrl,
+  });
+
+  let client;
+
   try {
     const { telegram_user_id } = req.body || {};
 
@@ -24,10 +30,12 @@ export default async function handler(req, res) {
       });
     }
 
-    const sql = neon(databaseUrl);
+    client = await pool.connect();
 
-    const result = await sql`
-      WITH axe_data AS (
+    await client.query("BEGIN");
+
+    const axesResult = await client.query(
+      `
         SELECT
           id,
           telegram_user_id,
@@ -35,105 +43,125 @@ export default async function handler(req, res) {
           claimed_at,
           expires_at,
           last_mined_at,
-          COALESCE(last_mined_at, claimed_at) AS checkpoint,
+          mining_remainder,
+
           LEAST(NOW(), expires_at) AS effective_now,
 
+          GREATEST(
+            0,
+            EXTRACT(
+              EPOCH FROM (
+                LEAST(NOW(), expires_at)
+                - COALESCE(last_mined_at, claimed_at)
+              )
+            ) / 3600.0
+          )
+          *
           CASE item
             WHEN 'stone_axe' THEN 2750.0 / 24.0
             WHEN 'iron_axe' THEN 100000.0 / 24.0
             WHEN 'steel_axe' THEN 300000.0 / 24.0
             ELSE 0.0
-          END AS rate_per_hour
+          END
+          +
+          mining_remainder
+          AS total_available
 
         FROM user_inventory
-        WHERE telegram_user_id = ${telegram_user_id}
+
+        WHERE telegram_user_id = $1
           AND status = 'active'
-      ),
 
-      calculated AS (
-        SELECT
-          *,
-          GREATEST(
-            0.0,
-            EXTRACT(
-              EPOCH FROM (effective_now - checkpoint)
-            ) / 3600.0 * rate_per_hour
-          ) AS earned
-        FROM axe_data
-      ),
+        FOR UPDATE
+      `,
+      [telegram_user_id]
+    );
 
-      credits AS (
-        SELECT
-          *,
-          FLOOR(earned) AS whole_zentic
-        FROM calculated
-      ),
+    let totalEarned = 0;
 
-      updated_axes AS (
-        UPDATE user_inventory ui
-        SET last_mined_at =
-          c.checkpoint
-          + (
-              c.whole_zentic / NULLIF(c.rate_per_hour, 0)
-            ) * INTERVAL '1 hour'
+    for (const axe of axesResult.rows) {
+      const totalAvailable = Number(axe.total_available);
 
-        FROM credits c
+      const wholeZentic = Math.floor(totalAvailable);
 
-        WHERE ui.id = c.id
-          AND ui.telegram_user_id = ${telegram_user_id}
-          AND ui.status = 'active'
-          AND c.whole_zentic > 0
-          AND ui.last_mined_at IS NOT DISTINCT FROM c.last_mined_at
+      const newRemainder =
+        totalAvailable - wholeZentic;
 
-        RETURNING c.whole_zentic
-      ),
+      await client.query(
+        `
+          UPDATE user_inventory
 
-      total_credit AS (
-        SELECT
-          COALESCE(
-            SUM(whole_zentic),
-            0
-          )::BIGINT AS amount
-        FROM updated_axes
-      ),
+          SET
+            last_mined_at = $1,
+            mining_remainder = $2
 
-      balance_update AS (
-        INSERT INTO users (
+          WHERE id = $3
+            AND telegram_user_id = $4
+            AND status = 'active'
+        `,
+        [
+          axe.effective_now,
+          newRemainder,
+          axe.id,
           telegram_user_id,
-          zentic_balance
-        )
-        SELECT
-          ${telegram_user_id},
-          amount
-        FROM total_credit
-        WHERE amount > 0
+        ]
+      );
 
-        ON CONFLICT (telegram_user_id)
-        DO UPDATE SET
-          zentic_balance =
-            users.zentic_balance + EXCLUDED.zentic_balance,
-          updated_at = NOW()
+      totalEarned += wholeZentic;
+    }
 
-        RETURNING zentic_balance
-      )
+    if (totalEarned > 0) {
+      await client.query(
+        `
+          INSERT INTO users (
+            telegram_user_id,
+            zentic_balance
+          )
 
-      SELECT
-        amount AS earned_zentic
-      FROM total_credit
-    `;
+          VALUES (
+            $1,
+            $2
+          )
 
-    const earnedZentic = Number(result[0]?.earned_zentic || 0);
+          ON CONFLICT (telegram_user_id)
+
+          DO UPDATE SET
+            zentic_balance =
+              users.zentic_balance + EXCLUDED.zentic_balance,
+            updated_at = NOW()
+        `,
+        [telegram_user_id, totalEarned]
+      );
+    }
+
+    await client.query("COMMIT");
 
     return res.status(200).json({
       success: true,
-      earned_zentic: earnedZentic,
+      earned_zentic: totalEarned,
     });
-
   } catch (error) {
+    if (client) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error(
+          "Mining rollback error:",
+          rollbackError
+        );
+      }
+    }
+
     console.error("Mining error:", error);
 
-      return res.status(500).json({
+    return res.status(500).json({
       error: "Internal server error",
     });
+  } finally {
+    if (client) {
+      client.release();
+    }
+
+    await pool.end();
   }
 }
