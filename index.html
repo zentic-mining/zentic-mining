@@ -226,34 +226,69 @@
     }
 
     async function testRewardAd() {
-      const status =
-        document.getElementById("status");
+  const status =
+    document.getElementById("status");
 
-      status.textContent =
-        "Loading rewarded ad...";
+  status.textContent =
+    "Loading rewarded ad...";
 
-      try {
-        const result =
-          await AdController.show();
+  try {
+    const result =
+      await AdController.show();
 
-        console.log(
-          "AdsGram Result:",
-          result
-        );
+    console.log(
+      "AdsGram Result:",
+      result
+    );
 
-        status.textContent =
-          "Rewarded ad completed!";
+    // AdsGram rewarded ad selesai.
+    // Sekarang laporkan completion ke backend.
+    const response =
+      await fetch("/api/daily-boost", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          initData: tg.initData
+        })
+      });
 
-      } catch (error) {
-        console.error(
-          "AdsGram Error:",
-          error
-        );
+    const data =
+      await response.json();
 
-        status.textContent =
-          "Ad failed or closed.";
-      }
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to update Daily Boost"
+      );
     }
+
+    console.log(
+      "Daily Boost Result:",
+      data
+    );
+
+    if (data.ads_completed >= 3) {
+      status.textContent =
+        "⚡ Daily Boost active for 1 hour!";
+    } else {
+      status.textContent =
+        "Rewarded ad completed! " +
+        data.ads_completed +
+        "/3";
+    }
+
+  } catch (error) {
+    console.error(
+      "AdsGram / Daily Boost Error:",
+      error
+    );
+
+    status.textContent =
+      "Ad failed or closed.";
+  }
+}
 
     async function testTelegramAuth() {
       const status =
