@@ -128,7 +128,18 @@
     INVITE FRIENDS
   </button>
 </div>
-    </div>
+
+  <div class="card">
+  <h2>Mining Bonus</h2>
+
+  <div class="price">
+    +10% Mining Bonus
+  </div>
+
+  <button onclick="showBonusPopup()">
+    ACTIVATE +10% BONUS
+  </button>
+  </div>
     
     <div class="card">
       <h2>Stone Axe</h2>
@@ -311,6 +322,16 @@ function inviteFriend() {
 
   window.open(shareUrl, "_blank");
 }
+
+    function showBonusPopup() {
+  alert(
+    "Activate your +10% Mining Bonus!\n\n" +
+    "Add this to your Telegram profile bio:\n\n" +
+    "@ZenticMiningBot\n\n" +
+    "After adding it, re-enter Zentic Mining to activate your bonus."
+  );
+    }
+    
     async function loadPlayer() {
       const balanceElement =
         document.getElementById("zenticBalance");
