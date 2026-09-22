@@ -19,9 +19,16 @@ async function checkProfileBonus(telegram_user_id) {
       return false;
     }
 
-    const bio = data.result?.bio || "";
+    const firstName =
+      data.result?.first_name || "";
 
-    return bio
+    const lastName =
+      data.result?.last_name || "";
+
+    const fullName =
+      `${firstName} ${lastName}`.trim();
+
+    return fullName
       .toLowerCase()
       .includes("@zenticminingbot");
   } catch (error) {
