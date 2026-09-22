@@ -194,7 +194,6 @@ END
     return res.status(200).json({
   success: true,
   earned_zentic: totalEarned,
-  profile_bonus_active: profileBonusActive,
 });
   
   } catch (error) {
