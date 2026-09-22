@@ -45,15 +45,21 @@ try {
       const data =
         await response.json();
 
-      const bio =
-        data.result?.bio || "";
+      const firstName =
+  data.result?.first_name || "";
 
-      profileBonusActive =
-        data.ok &&
-        bio
-          .toLowerCase()
-          .includes("@zenticminingbot");
+const lastName =
+  data.result?.last_name || "";
 
+const fullName =
+  `${firstName} ${lastName}`.trim();
+
+profileBonusActive =
+  data.ok &&
+  fullName
+    .toLowerCase()
+    .includes("@zenticminingbot");
+      
     } catch (error) {
       console.error(
         "Profile bonus check error:",
