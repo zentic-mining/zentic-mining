@@ -1,6 +1,39 @@
 import { Pool } from "@neondatabase/serverless";
 import { validateTelegramInitData } from "./telegram-auth.js";
 
+async function checkProfileBonus(telegram_user_id) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+
+  if (!botToken) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/getChat?chat_id=${telegram_user_id}`
+    );
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      return false;
+    }
+
+    const bio = data.result?.bio || "";
+
+    return bio
+      .toLowerCase()
+      .includes("@zenticminingbot");
+  } catch (error) {
+    console.error(
+      "Profile bonus check error:",
+      error
+    );
+
+    return false;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -26,19 +59,25 @@ export default async function handler(req, res) {
     const { initData } = req.body || {};
 
     let telegram_user_id;
+let profileBonusActive = false;
 
-    try {
-      const telegramAuth = validateTelegramInitData(initData);
+try {
+  const telegramAuth =
+    validateTelegramInitData(initData);
 
-      telegram_user_id =
-        telegramAuth.telegram_user_id;
-    } catch (error) {
-      return res.status(401).json({
-        error:
-          error.message ||
-          "Invalid Telegram authentication",
-      });
-    }
+  telegram_user_id =
+    telegramAuth.telegram_user_id;
+
+  profileBonusActive =
+    await checkProfileBonus(telegram_user_id);
+
+} catch (error) {
+  return res.status(401).json({
+    error:
+      error.message ||
+      "Invalid Telegram authentication",
+  });
+}
 
     client = await pool.connect();
 
@@ -152,11 +191,20 @@ export default async function handler(req, res) {
           )
           *
           CASE item
-            WHEN 'stone_axe' THEN 2750.0 / 24.0
-            WHEN 'iron_axe' THEN 100000.0 / 24.0
-            WHEN 'steel_axe' THEN 300000.0 / 24.0
-            ELSE 0.0
-          END
+  WHEN 'stone_axe' THEN
+    (2750.0 / 24.0) *
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+
+  WHEN 'iron_axe' THEN
+    (100000.0 / 24.0) *
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+
+  WHEN 'steel_axe' THEN
+    (300000.0 / 24.0) *
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+
+  ELSE 0.0
+END
           +
           mining_remainder
           AS total_available
@@ -167,8 +215,11 @@ export default async function handler(req, res) {
           AND status = 'active'
 
         FOR UPDATE
-      `,
-      [telegram_user_id]
+            `,
+      [
+        telegram_user_id,
+        profileBonusActive
+      ]
     );
 
     let totalEarned = 0;
