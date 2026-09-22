@@ -263,6 +263,9 @@ tonConnectUI.onStatusChange((wallet) => {
 
 tg.ready();
 tg.expand();
+    document.getElementById("status").textContent =
+  "START PARAM: " +
+(tg.initDataUnsafe.start_param || "NOT FOUND")
 
 const AdController = window.Adsgram.init({
   blockId: "49221",
