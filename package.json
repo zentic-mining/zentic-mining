@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "22.x"
-  },
+  "node": "24.x"
+  }
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2"
   }
