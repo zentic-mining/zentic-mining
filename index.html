@@ -168,7 +168,7 @@
   </div>
 
   <script>
-    const tg = window.Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
   manifestUrl:
@@ -177,11 +177,39 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
 });
 
 tonConnectUI.setConnectRequestParameters({
-  state: "ready",
-  value: {
-    tonProof: "zentic-mining"
-  }
+  state: "loading"
 });
+
+fetch("/api/wallet", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    initData: tg.initData,
+    action: "generate-proof"
+  })
+})
+  .then((response) => response.json())
+  .then((data) => {
+    if (!data.success || !data.tonProofPayload) {
+      throw new Error(
+        data.error || "Failed to generate TON proof"
+      );
+    }
+
+    tonConnectUI.setConnectRequestParameters({
+      state: "ready",
+      value: {
+        tonProof: data.tonProofPayload
+      }
+    });
+  })
+  .catch((error) => {
+    console.error("TON Proof error:", error);
+
+    tonConnectUI.setConnectRequestParameters(null);
+  });
 
 tonConnectUI.onStatusChange((wallet) => {
   if (wallet) {
@@ -192,14 +220,14 @@ tonConnectUI.onStatusChange((wallet) => {
   }
 });
 
-    tg.ready();
-    tg.expand();
+tg.ready();
+tg.expand();
 
-    const AdController = window.Adsgram.init({
-      blockId: "49221",
-      debug: true,
-      debugBannerType: "RewardedVideo"
-    });
+const AdController = window.Adsgram.init({
+  blockId: "49221",
+  debug: true,
+  debugBannerType: "RewardedVideo"
+});
 
     async function loadPlayer() {
       const balanceElement =
