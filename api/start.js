@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { validateTelegramInitData } from "./telegram-auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -16,11 +17,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { telegram_user_id } = req.body || {};
+    const { initData } = req.body || {};
 
-    if (!telegram_user_id) {
-      return res.status(400).json({
-        error: "Missing Telegram user ID",
+    let telegram_user_id;
+
+    try {
+      const telegramAuth =
+        validateTelegramInitData(initData);
+
+      telegram_user_id =
+        telegramAuth.telegram_user_id;
+    } catch (error) {
+      return res.status(401).json({
+        error:
+          error.message ||
+          "Invalid Telegram authentication",
       });
     }
 
