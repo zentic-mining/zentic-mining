@@ -363,10 +363,24 @@ function inviteFriend() {
         balanceElement.textContent =
           balance.toLocaleString("en-US") + " Zentic";
 
-        console.log("Player Result:", data);
+        const activeAxe =
+  data.inventory?.find(
+    (item) =>
+      item.item === "stone_axe" &&
+      item.status === "active"
+  );
 
-        return data;
+if (activeAxe) {
+  document.getElementById("status").textContent =
+    "Stone Axe Rate: " +
+    activeAxe.rate +
+    " Zentic/day";
+}
 
+console.log("Player Result:", data);
+
+return data;
+        
       } catch (error) {
         console.error("Load Player Error:", error);
 
