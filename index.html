@@ -111,6 +111,24 @@
     </div>
     
 <div id="ton-connect"></div>
+
+<div class="card">
+  <h2>Referral Program</h2>
+
+  <div class="price">
+    Earn 10,000 Zentic
+  </div>
+
+  <p>
+    Invite a friend and earn 10,000 Zentic
+    when they start mining.
+  </p>
+
+  <button onclick="inviteFriend()">
+    INVITE FRIENDS
+  </button>
+</div>
+    </div>
     
     <div class="card">
       <h2>Stone Axe</h2>
@@ -269,7 +287,30 @@ const AdController = window.Adsgram.init({
   debug: true,
   debugBannerType: "RewardedVideo"
 });
+    
+function inviteFriend() {
+  const userId = tg.initDataUnsafe?.user?.id;
 
+  if (!userId) {
+    document.getElementById("status").textContent =
+      "Unable to get Telegram user ID.";
+    return;
+  }
+
+  const referralLink =
+    "https://t.me/ZenticMiningBot?startapp=" +
+    userId;
+
+  const shareUrl =
+    "https://t.me/share/url?url=" +
+    encodeURIComponent(referralLink) +
+    "&text=" +
+    encodeURIComponent(
+      "Join Zentic Mining and start earning Zentic!"
+    );
+
+  window.open(shareUrl, "_blank");
+}
     async function loadPlayer() {
       const balanceElement =
         document.getElementById("zenticBalance");
