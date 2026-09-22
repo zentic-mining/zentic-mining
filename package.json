@@ -6,6 +6,9 @@
     "node": "22.x"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2"
+    "@neondatabase/serverless": "^1.0.2",
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^16.0.0",
+    "tweetnacl": "^1.0.3"
   }
 }
