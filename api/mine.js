@@ -24,42 +24,51 @@ let client;
 try {
   const { initData } = req.body || {};
 
-  let telegram_user_id;
-
-  try {
-    const telegramAuth = validateTelegramInitData(initData);
-    telegram_user_id = telegramAuth.telegram_user_id;
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-
+let telegram_user_id;
 let profileBonusActive = false;
 
-if (botToken) {
-  try {
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/getChat?chat_id=${telegram_user_id}`
-    );
+try {
+  const telegramAuth = validateTelegramInitData(initData);
 
-    const data = await response.json();
+  telegram_user_id =
+    telegramAuth.telegram_user_id;
 
-    const bio = data.result?.bio || "";
+  const botToken =
+    process.env.TELEGRAM_BOT_TOKEN;
 
-    profileBonusActive =
-      data.ok &&
-      bio.toLowerCase().includes("@zenticminingbot");
+  if (botToken) {
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${botToken}/getChat?chat_id=${telegram_user_id}`
+      );
 
-  } catch (error) {
-    console.error(
-      "Profile bonus check error:",
-      error
-    );
+      const data =
+        await response.json();
+
+      const bio =
+        data.result?.bio || "";
+
+      profileBonusActive =
+        data.ok &&
+        bio
+          .toLowerCase()
+          .includes("@zenticminingbot");
+
+    } catch (error) {
+      console.error(
+        "Profile bonus check error:",
+        error
+      );
+    }
   }
+
+} catch (error) {
+  return res.status(401).json({
+    error:
+      error.message ||
+      "Invalid Telegram authentication",
+  });
 }
-  } catch (error) {
-    return res.status(401).json({
-      error: error.message || "Invalid Telegram authentication",
-    });
-  }
-
   client = await pool.connect();
     await client.query("BEGIN");
 
