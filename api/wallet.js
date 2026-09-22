@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { initData, action } = req.body || {};
+    const { initData, action, proof } = req.body || {};
 
     const telegramAuth =
       validateTelegramInitData(initData);
@@ -17,25 +17,42 @@ export default async function handler(req, res) {
     const telegram_user_id =
       telegramAuth.telegram_user_id;
 
-    if (action !== "generate-proof") {
-      return res.status(400).json({
-        error: "Invalid wallet action",
+    // Generate TON Proof payload
+    if (action === "generate-proof") {
+      const nonce =
+        crypto.randomBytes(32).toString("base64url");
+
+      const expires_at =
+        Math.floor(Date.now() / 1000) + 600;
+
+      const tonProofPayload =
+        `${telegram_user_id}:${expires_at}:${nonce}`;
+
+      return res.status(200).json({
+        success: true,
+        tonProofPayload,
+        expires_at,
       });
     }
 
-    const nonce =
-      crypto.randomBytes(32).toString("base64url");
+    // Verify TON Proof
+    if (action === "verify-proof") {
+      if (!proof) {
+        return res.status(400).json({
+          error: "Missing TON proof",
+        });
+      }
 
-    const expires_at =
-      Math.floor(Date.now() / 1000) + 600;
+      return res.status(200).json({
+        success: true,
+        message: "TON proof received",
+        telegram_user_id,
+        proof,
+      });
+    }
 
-    const tonProofPayload =
-      `${telegram_user_id}:${expires_at}:${nonce}`;
-
-    return res.status(200).json({
-      success: true,
-      tonProofPayload,
-      expires_at,
+    return res.status(400).json({
+      error: "Invalid wallet action",
     });
   } catch (error) {
     console.error("Wallet error:", error);
