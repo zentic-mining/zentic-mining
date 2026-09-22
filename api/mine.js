@@ -29,6 +29,31 @@ try {
   try {
     const telegramAuth = validateTelegramInitData(initData);
     telegram_user_id = telegramAuth.telegram_user_id;
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+
+let profileBonusActive = false;
+
+if (botToken) {
+  try {
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/getChat?chat_id=${telegram_user_id}`
+    );
+
+    const data = await response.json();
+
+    const bio = data.result?.bio || "";
+
+    profileBonusActive =
+      data.ok &&
+      bio.toLowerCase().includes("@zenticminingbot");
+
+  } catch (error) {
+    console.error(
+      "Profile bonus check error:",
+      error
+    );
+  }
+}
   } catch (error) {
     return res.status(401).json({
       error: error.message || "Invalid Telegram authentication",
@@ -62,11 +87,20 @@ try {
           )
           *
           CASE item
-            WHEN 'stone_axe' THEN 2750.0 / 24.0
-            WHEN 'iron_axe' THEN 100000.0 / 24.0
-            WHEN 'steel_axe' THEN 300000.0 / 24.0
-            ELSE 0.0
-          END
+  WHEN 'stone_axe' THEN
+    (2750.0 / 24.0) *
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+
+  WHEN 'iron_axe' THEN
+    (100000.0 / 24.0) *
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+
+  WHEN 'steel_axe' THEN
+    (300000.0 / 24.0) *
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+
+  ELSE 0.0
+END
           +
           mining_remainder
           AS total_available
@@ -78,9 +112,11 @@ try {
 
         FOR UPDATE
       `,
-      [telegram_user_id]
-    );
-
+[
+  telegram_user_id,
+  profileBonusActive
+]
+);
     let totalEarned = 0;
 
     for (const axe of axesResult.rows) {
