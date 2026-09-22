@@ -671,56 +671,55 @@ return data;
     }
 
     async function testMining() {
-      const status =
-        document.getElementById("status");
+  const status =
+    document.getElementById("status");
 
-      status.textContent =
-        "Mining...";
+  status.textContent =
+    "Mining...";
 
-      try {
-        const response =
-          await fetch("/api/mine", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              initData: tg.initData
-            })
-          });
+  try {
+    const response =
+      await fetch("/api/mine", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          initData: tg.initData
+        })
+      });
 
-        const data =
-          await response.json();
+    const data =
+      await response.json();
 
-        if (!response.ok) {
-          throw new Error(
-            data.error ||
-            "Mining failed"
-          );
-        }
-
-        status.textContent =
-          "Mining OK. Earned: " +
-          data.earned_zentic +
-          " Zentic";
-
-        console.log(
-          "Mining Result:",
-          data
-        );
-
-        // Refresh balance after mining.
-        await loadPlayer();
-
-      } catch (error) {
-        console.error(error);
-
-        status.textContent =
-          "Mining Failed: " +
-          error.message;
-      }
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Mining failed"
+      );
     }
 
+    if (data.profile_bonus_active) {
+      status.textContent =
+        "✅ Mining OK — +10% Bonus ACTIVE";
+    } else {
+      status.textContent =
+        "⚠️ Mining OK — +10% Bonus NOT ACTIVE";
+    }
+
+    console.log(
+      "Mining Result:",
+      data
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    status.textContent =
+      "Mining Failed: " +
+      error.message;
+  }
+}
     // Load player and balance when the app opens.
     loadPlayer();
   </script>
