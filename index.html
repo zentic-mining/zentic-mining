@@ -110,6 +110,9 @@
 <button onclick="testMining()">
   Test Mining
 </button>
+    <button onclick="testRewardAd()">
+  TEST REWARDED AD
+    </button>
     <div id="status"></div>
   </div>
 
@@ -119,8 +122,29 @@
     tg.ready();
     tg.expand();
     const AdController = window.Adsgram.init({
-  blockId: "49221"
+  blockId: "49221",
+  debug: true,
+  debugBannerType: "RewardedVideo"
 });
+    async function testRewardAd() {
+  const status = document.getElementById("status");
+
+  status.textContent = "Loading rewarded ad...";
+
+  try {
+    const result = await AdController.show();
+
+    console.log("AdsGram Result:", result);
+
+    status.textContent = "Rewarded ad completed!";
+
+  } catch (error) {
+    console.error("AdsGram Error:", error);
+
+    status.textContent =
+      "Ad failed or closed.";
+  }
+}
 async function testTelegramAuth() {
   const status = document.getElementById("status");
 
