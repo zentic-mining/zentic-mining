@@ -176,6 +176,15 @@
   buttonRootId: "ton-connect"
 });
 
+tonConnectUI.onStatusChange((wallet) => {
+  if (wallet) {
+    console.log(
+      "TON Wallet Connected:",
+      wallet.account.address
+    );
+  }
+});
+
     tg.ready();
     tg.expand();
 
