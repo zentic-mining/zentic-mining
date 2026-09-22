@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { Pool } from "@neondatabase/serverless";
 import { validateTelegramInitData } from "./telegram-auth.js";
 
 export default async function handler(req, res) {
@@ -18,23 +19,54 @@ export default async function handler(req, res) {
       telegramAuth.telegram_user_id;
 
     // Generate TON Proof payload
-    if (action === "generate-proof") {
-      const nonce =
-        crypto.randomBytes(32).toString("base64url");
+if (action === "generate-proof") {
+  const databaseUrl = process.env.DATABASE_URL;
 
-      const expires_at =
-        Math.floor(Date.now() / 1000) + 600;
+  if (!databaseUrl) {
+    return res.status(500).json({
+      error: "Database is not configured",
+    });
+  }
 
-      const tonProofPayload =
-        `${telegram_user_id}:${expires_at}:${nonce}`;
+  const pool = new Pool({
+    connectionString: databaseUrl,
+  });
 
-      return res.status(200).json({
-        success: true,
+  try {
+    const nonce =
+      crypto.randomBytes(32).toString("base64url");
+
+    const expires_at =
+      Math.floor(Date.now() / 1000) + 600;
+
+    const tonProofPayload =
+      `${telegram_user_id}:${expires_at}:${nonce}`;
+
+    await pool.query(
+      `
+        INSERT INTO ton_proof_nonces (
+          telegram_user_id,
+          payload,
+          expires_at
+        )
+        VALUES ($1, $2, $3)
+      `,
+      [
+        telegram_user_id,
         tonProofPayload,
         expires_at,
-      });
-    }
+      ]
+    );
 
+    return res.status(200).json({
+      success: true,
+      tonProofPayload,
+      expires_at,
+    });
+  } finally {
+    await pool.end();
+  }
+}
     // Verify TON Proof
     if (action === "verify-proof") {
       if (!proof) {
