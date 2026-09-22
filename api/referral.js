@@ -23,20 +23,27 @@ export default async function handler(req, res) {
   let client;
 
   try {
-    const { initData, start_param } = req.body || {};
+    const { initData } = req.body || {};
 
-    let referred_telegram_user_id;
+let referred_telegram_user_id;
+let start_param;
 
-    try {
-      const telegramAuth = validateTelegramInitData(initData);
+try {
+  const telegramAuth =
+    validateTelegramInitData(initData);
 
-      referred_telegram_user_id =
-        telegramAuth.telegram_user_id;
-    } catch (error) {
-      return res.status(401).json({
-        error: error.message || "Invalid Telegram authentication",
-      });
-    }
+  referred_telegram_user_id =
+    telegramAuth.telegram_user_id;
+
+  start_param =
+    telegramAuth.start_param;
+} catch (error) {
+  return res.status(401).json({
+    error:
+      error.message ||
+      "Invalid Telegram authentication",
+  });
+}
 
     if (!start_param) {
       return res.status(400).json({
