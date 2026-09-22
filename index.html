@@ -212,11 +212,52 @@ fetch("/api/wallet", {
   });
 
 tonConnectUI.onStatusChange((wallet) => {
-  if (wallet) {
-    console.log(
-      "TON Wallet Connected:",
-      wallet.account.address
-    );
+  if (!wallet) {
+    return;
+  }
+
+  console.log(
+    "TON Wallet Connected:",
+    wallet.account.address
+  );
+
+  const tonProof = wallet.connectItems?.tonProof;
+
+  if (
+    tonProof &&
+    "proof" in tonProof
+  ) {
+    fetch("/api/wallet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        initData: tg.initData,
+        action: "verify-proof",
+        proof: {
+          address: wallet.account.address,
+          network: wallet.account.chain,
+          publicKey: wallet.account.publicKey,
+          walletStateInit:
+            wallet.account.walletStateInit,
+          ...tonProof.proof
+        }
+      })
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(
+          "TON Proof Verification:",
+          data
+        );
+      })
+      .catch((error) => {
+        console.error(
+          "TON Proof Verification Error:",
+          error
+        );
+      });
   }
 });
 
