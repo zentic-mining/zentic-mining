@@ -25,11 +25,21 @@ export default async function handler(req, res) {
   try {
     const { initData } = req.body || {};
 
-    const telegramAuth =
-      validateTelegramInitData(initData);
+let telegram_user_id;
 
-    const telegram_user_id =
-      telegramAuth.telegram_user_id;
+try {
+  const telegramAuth =
+    validateTelegramInitData(initData);
+
+  telegram_user_id =
+    telegramAuth.telegram_user_id;
+} catch (error) {
+  return res.status(401).json({
+    error:
+      error.message ||
+      "Invalid Telegram authentication",
+  });
+}
 
     client = await pool.connect();
 
