@@ -34,21 +34,6 @@ const ALLOWED_DOMAIN =
 const MAX_PROOF_AGE_SECONDS =
   15 * 60;
 
-/*
- * Extract public key from standard TON wallet
- * StateInit.
- *
- * Supports:
- * V1R1
- * V1R2
- * V1R3
- * V2R1
- * V2R2
- * V3R1
- * V3R2
- * V4R2
- * V5R1
- */
 function loadV1(cs) {
   cs.loadUint(32);
 
@@ -164,9 +149,6 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Domain must belong to this app.
-     */
     if (
       proof.domain?.value !==
       ALLOWED_DOMAIN
@@ -174,10 +156,6 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Verify the UTF-8 byte length of
-     * the domain.
-     */
     const domainBytes =
       Buffer.from(
         proof.domain.value,
@@ -191,9 +169,6 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Verify timestamp.
-     */
     const timestamp =
       Number(proof.timestamp);
 
@@ -216,15 +191,9 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Parse wallet address.
-     */
     const walletAddress =
       Address.parse(address);
 
-    /*
-     * Parse wallet StateInit.
-     */
     const stateInitCell =
       Cell.fromBase64(
         walletStateInit
@@ -235,10 +204,6 @@ async function verifyTonProof({
         stateInitCell.beginParse()
       );
 
-    /*
-     * Verify that StateInit actually
-     * produces the claimed wallet address.
-     */
     const derivedAddress =
       contractAddress(
         walletAddress.workChain,
@@ -253,12 +218,6 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * TON Connect spec explicitly requires:
-     *
-     * walletStateInit.hash()
-     * === address.hash
-     */
     if (
       !stateInitCell
         .hash()
@@ -267,22 +226,11 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Extract public key from the
-     * known standard wallet contract.
-     */
     const extractedPublicKey =
       tryExtractPublicKey(
         stateInit
       );
 
-    /*
-     * We intentionally reject unknown
-     * wallet contract versions here.
-     *
-     * This prevents us from trusting a
-     * publicKey supplied by the frontend.
-     */
     if (!extractedPublicKey) {
       console.error(
         "Unsupported TON wallet contract"
@@ -291,11 +239,6 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Compare public key supplied by
-     * TON Connect with the public key
-     * extracted from StateInit.
-     */
     const suppliedPublicKey =
       Buffer.from(
         publicKey,
@@ -316,9 +259,6 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Reconstruct TON Proof message.
-     */
     const workchain =
       Buffer.alloc(4);
 
@@ -330,11 +270,6 @@ async function verifyTonProof({
     const domainLength =
       Buffer.alloc(4);
 
-    /*
-     * TON Connect spec uses
-     * unsigned 32-bit LITTLE endian
-     * for domain length.
-     */
     domainLength.writeUInt32LE(
       domainBytes.length,
       0
@@ -343,22 +278,11 @@ async function verifyTonProof({
     const timestampBuffer =
       Buffer.alloc(8);
 
-    /*
-     * TON Connect spec uses
-     * unsigned 64-bit LITTLE endian
-     * timestamp.
-     */
     timestampBuffer.writeBigUInt64LE(
       BigInt(timestamp),
       0
     );
 
-    /*
-     * Payload is variable-length data
-     * and is placed at the end.
-     *
-     * Our generated payload is text.
-     */
     const payload =
       Buffer.from(
         proof.payload,
@@ -385,21 +309,9 @@ async function verifyTonProof({
         payload,
       ]);
 
-    /*
-     * First SHA-256:
-     *
-     * sha256(message)
-     */
     const messageHash =
       await sha256(message);
 
-    /*
-     * TON Connect signature envelope:
-     *
-     * 0xffff
-     * + "ton-connect"
-     * + sha256(message)
-     */
     const fullMessage =
       Buffer.concat([
         Buffer.from([
@@ -415,18 +327,11 @@ async function verifyTonProof({
         messageHash,
       ]);
 
-    /*
-     * Final hash signed by wallet.
-     */
     const finalHash =
       await sha256(
         fullMessage
       );
 
-    /*
-     * Signature returned by TON Connect
-     * is Base64 encoded.
-     */
     const signature =
       Buffer.from(
         proof.signature,
@@ -439,9 +344,6 @@ async function verifyTonProof({
       return false;
     }
 
-    /*
-     * Verify Ed25519 signature.
-     */
     return nacl.sign.detached.verify(
       new Uint8Array(finalHash),
       new Uint8Array(signature),
@@ -478,16 +380,21 @@ export default async function handler(
       proof,
     } = req.body || {};
 
-    /*
-     * Always authenticate Telegram first.
-     */
-    const telegramAuth =
-      validateTelegramInitData(
-        initData
-      );
+    let telegram_user_id;
 
-    const telegram_user_id =
-      telegramAuth.telegram_user_id;
+    try {
+      const telegramAuth =
+        validateTelegramInitData(initData);
+
+      telegram_user_id =
+        telegramAuth.telegram_user_id;
+    } catch (error) {
+      return res.status(401).json({
+        error:
+          error.message ||
+          "Invalid Telegram authentication",
+      });
+    }
 
     const databaseUrl =
       process.env.DATABASE_URL;
@@ -504,11 +411,6 @@ export default async function handler(
         databaseUrl,
     });
 
-    /*
-     * =====================================
-     * GENERATE TON PROOF
-     * =====================================
-     */
     if (
       action ===
       "generate-proof"
@@ -551,11 +453,6 @@ export default async function handler(
       });
     }
 
-    /*
-     * =====================================
-     * VERIFY TON PROOF
-     * =====================================
-     */
     if (
       action ===
       "verify-proof"
@@ -582,10 +479,6 @@ export default async function handler(
         });
       }
 
-      /*
-       * Find the exact server-issued
-       * payload for this Telegram user.
-       */
       const nonceResult =
         await pool.query(
           `
@@ -619,9 +512,6 @@ export default async function handler(
       const nonce =
         nonceResult.rows[0];
 
-      /*
-       * Prevent replay.
-       */
       if (nonce.used_at) {
         return res.status(401).json({
           error:
@@ -629,9 +519,6 @@ export default async function handler(
         });
       }
 
-      /*
-       * Server-side nonce expiration.
-       */
       const now =
         Math.floor(
           Date.now() / 1000
@@ -647,9 +534,6 @@ export default async function handler(
         });
       }
 
-      /*
-       * Verify the cryptographic proof.
-       */
       const valid =
         await verifyTonProof({
           address:
@@ -671,9 +555,6 @@ export default async function handler(
         });
       }
 
-      /*
-       * Consume nonce atomically.
-       */
       const consumeResult =
         await pool.query(
           `
@@ -700,10 +581,6 @@ export default async function handler(
         });
       }
 
-      /*
-       * Save the verified wallet
-       * against this Telegram user.
-       */
       const userResult =
         await pool.query(
           `
