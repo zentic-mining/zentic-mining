@@ -29,9 +29,10 @@
     }
 
     body {
-      padding: 16px;
+  padding: 16px;
+  padding-bottom: 78px;
     }
-
+    
     .container {
       width: 100%;
       max-width: 520px;
@@ -266,6 +267,49 @@
     }
 
     /* =========================
+   BOTTOM NAVIGATION
+========================= */
+
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+
+  width: min(520px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  padding: 8px 10px;
+  background: rgba(11, 16, 32, 0.96);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+
+  z-index: 1000;
+}
+
+.nav-button {
+  border: 0;
+  background: transparent;
+  color: #8e96a8;
+
+  padding: 10px 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+
+  cursor: pointer;
+}
+
+.nav-button.active {
+  color: #ffffff;
+}
+
+.nav-button:active {
+  opacity: 0.7;
+}
+
+
+    /* =========================
        MOBILE
     ========================= */
 
@@ -349,6 +393,36 @@
     <div id="ton-connect"></div>
 
   </div>
+      <!-- TON CONNECT -->
+    <div id="ton-connect"></div>
+
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-button active"
+      onclick="switchPage('warehouse', this)"
+    >
+      WAREHOUSE
+    </button>
+
+    <button
+      class="nav-button"
+      onclick="switchPage('workshop', this)"
+    >
+      WORKSHOP
+    </button>
+
+    <button
+      class="nav-button"
+      onclick="switchPage('rewards', this)"
+    >
+      REWARDS
+    </button>
+
+  </nav>
 
   <script>
     const tg = window.Telegram.WebApp;
