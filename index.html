@@ -29,10 +29,10 @@
     }
 
     body {
-  padding: 16px;
-  padding-bottom: 78px;
+      padding: 16px;
+      padding-bottom: 78px;
     }
-    
+
     .container {
       width: 100%;
       max-width: 520px;
@@ -87,6 +87,18 @@
       font-size: 9px;
       font-weight: 700;
       white-space: nowrap;
+    }
+
+    /* =========================
+       PAGE SYSTEM
+    ========================= */
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
     }
 
     /* =========================
@@ -267,47 +279,132 @@
     }
 
     /* =========================
-   BOTTOM NAVIGATION
-========================= */
+       WORKSHOP
+    ========================= */
 
-.bottom-nav {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
+    .workshop-title {
+      margin: 8px 0 14px;
+      text-align: left;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
 
-  width: min(520px, 100%);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+    .workshop-card {
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      background: rgba(20, 27, 46, 0.94);
+      box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.35),
+        inset 0 0 18px rgba(255, 255, 255, 0.025);
+    }
 
-  padding: 8px 10px;
-  background: rgba(11, 16, 32, 0.96);
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
+    .workshop-card h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
 
-  z-index: 1000;
-}
+    .workshop-card p {
+      margin: 8px 0 0;
+      color: #aeb5c5;
+      font-size: 11px;
+      line-height: 1.5;
+    }
 
-.nav-button {
-  border: 0;
-  background: transparent;
-  color: #8e96a8;
+    .workshop-button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 11px;
+      border: 0;
+      border-radius: 10px;
+      background: linear-gradient(
+        135deg,
+        #19aef5,
+        #2374ff
+      );
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+    }
 
-  padding: 10px 4px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+    /* =========================
+       REWARDS
+    ========================= */
 
-  cursor: pointer;
-}
+    .rewards-title {
+      margin: 8px 0 14px;
+      text-align: left;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
 
-.nav-button.active {
-  color: #ffffff;
-}
+    .rewards-card {
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      background: rgba(20, 27, 46, 0.94);
+      box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.35),
+        inset 0 0 18px rgba(255, 255, 255, 0.025);
+    }
 
-.nav-button:active {
-  opacity: 0.7;
-}
+    .rewards-card h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
 
+    .rewards-card p {
+      margin: 8px 0 0;
+      color: #aeb5c5;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       BOTTOM NAVIGATION
+    ========================= */
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+
+      width: min(520px, 100%);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+
+      padding: 8px 10px;
+      background: rgba(11, 16, 32, 0.96);
+      border-top: 1px solid rgba(255, 255, 255, 0.10);
+
+      z-index: 1000;
+    }
+
+    .nav-button {
+      border: 0;
+      background: transparent;
+      color: #8e96a8;
+
+      padding: 10px 4px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+
+      cursor: pointer;
+    }
+
+    .nav-button.active {
+      color: #ffffff;
+    }
+
+    .nav-button:active {
+      opacity: 0.7;
+    }
 
     /* =========================
        MOBILE
@@ -316,6 +413,7 @@
     @media (max-width: 390px) {
       body {
         padding: 12px;
+        padding-bottom: 78px;
       }
 
       .brand-title {
@@ -363,6 +461,7 @@
       </div>
 
       <div class="balance-box">
+
         <div
           class="balance"
           id="zenticBalance"
@@ -373,32 +472,108 @@
         <div class="balance-rate">
           1M Zentic = 1 USDT
         </div>
+
       </div>
 
     </div>
 
-    <!-- WAREHOUSE -->
-    <div class="section-title">
-      WAREHOUSE
-    </div>
+
+    <!-- =========================
+         WAREHOUSE
+    ========================= -->
 
     <div
-      id="equipmentGrid"
-      class="equipment-grid"
-    ></div>
+      id="warehousePage"
+      class="page active"
+    >
 
-    <div id="status"></div>
+      <div class="section-title">
+        WAREHOUSE
+      </div>
+
+      <div
+        id="equipmentGrid"
+        class="equipment-grid"
+      ></div>
+
+      <div id="status"></div>
+
+    </div>
+
+
+    <!-- =========================
+         WORKSHOP
+    ========================= -->
+
+    <div
+      id="workshopPage"
+      class="page"
+    >
+
+      <div class="workshop-title">
+        WORKSHOP
+      </div>
+
+      <div class="workshop-card">
+
+        <h2>
+          Equipment Workshop
+        </h2>
+
+        <p>
+          Upgrade and maintain your mining equipment.
+        </p>
+
+        <button
+          class="workshop-button"
+          type="button"
+        >
+          WORKSHOP
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         REWARDS
+    ========================= -->
+
+    <div
+      id="rewardsPage"
+      class="page"
+    >
+
+      <div class="rewards-title">
+        REWARDS
+      </div>
+
+      <div class="rewards-card">
+
+        <h2>
+          Mining Rewards
+        </h2>
+
+        <p>
+          Rewards and achievements will appear here.
+        </p>
+
+      </div>
+
+    </div>
+
 
     <!-- TON CONNECT -->
     <div id="ton-connect"></div>
 
   </div>
-      <!-- TON CONNECT -->
-    <div id="ton-connect"></div>
 
-  </div>
 
-  <!-- BOTTOM NAVIGATION -->
+  <!-- =========================
+       BOTTOM NAVIGATION
+  ========================= -->
+
   <nav class="bottom-nav">
 
     <button
@@ -424,13 +599,16 @@
 
   </nav>
 
+
   <script>
     const tg = window.Telegram.WebApp;
 
     const DAY_MS =
       24 * 60 * 60 * 1000;
 
+
     const EQUIPMENT = {
+
       stone_axe: {
         name: "Stone Axe",
         rarity: "Common",
@@ -454,7 +632,9 @@
         maxDurability: 45,
         image: "/steel-axe.png"
       }
+
     };
+
 
     /* =========================
        TELEGRAM
@@ -462,6 +642,7 @@
 
     tg.ready();
     tg.expand();
+
 
     /* =========================
        TON CONNECT
@@ -471,40 +652,54 @@
       new TON_CONNECT_UI.TonConnectUI({
         manifestUrl:
           "https://zentic-mining.vercel.app/tonconnect-manifest.json",
-        buttonRootId: "ton-connect"
+
+        buttonRootId:
+          "ton-connect"
       });
+
 
     tonConnectUI.setConnectRequestParameters({
       state: "loading"
     });
 
+
     fetch("/api/wallet", {
       method: "POST",
+
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type":
+          "application/json"
       },
+
       body: JSON.stringify({
         initData: tg.initData,
         action: "generate-proof"
       })
+
     })
+
       .then((response) =>
         response.json()
       )
+
       .then((data) => {
 
         if (
           !data.success ||
           !data.tonProofPayload
         ) {
+
           throw new Error(
             data.error ||
             "Failed to generate TON proof"
           );
+
         }
+
 
         tonConnectUI.setConnectRequestParameters({
           state: "ready",
+
           value: {
             tonProof:
               data.tonProofPayload
@@ -512,6 +707,7 @@
         });
 
       })
+
       .catch(() => {
 
         tonConnectUI.setConnectRequestParameters(
@@ -520,6 +716,7 @@
 
       });
 
+
     tonConnectUI.onStatusChange(
       (wallet) => {
 
@@ -527,8 +724,10 @@
           return;
         }
 
+
         const tonProof =
           wallet.connectItems?.tonProof;
+
 
         if (
           tonProof &&
@@ -536,14 +735,24 @@
         ) {
 
           fetch("/api/wallet", {
+
             method: "POST",
+
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type":
+                "application/json"
             },
+
             body: JSON.stringify({
-              initData: tg.initData,
-              action: "verify-proof",
+
+              initData:
+                tg.initData,
+
+              action:
+                "verify-proof",
+
               proof: {
+
                 address:
                   wallet.account.address,
 
@@ -558,55 +767,151 @@
                     .walletStateInit,
 
                 ...tonProof.proof
+
               }
+
             })
+
           }).catch(() => {});
+
         }
+
       }
     );
+
+
+    /* =========================
+       PAGE SWITCHING
+    ========================= */
+
+    function switchPage(
+      pageName,
+      button
+    ) {
+
+      const pages =
+        document.querySelectorAll(
+          ".page"
+        );
+
+
+      pages.forEach((page) => {
+        page.classList.remove(
+          "active"
+        );
+      });
+
+
+      const target =
+        document.getElementById(
+          pageName + "Page"
+        );
+
+
+      if (target) {
+
+        target.classList.add(
+          "active"
+        );
+
+      }
+
+
+      const buttons =
+        document.querySelectorAll(
+          ".nav-button"
+        );
+
+
+      buttons.forEach((navButton) => {
+
+        navButton.classList.remove(
+          "active"
+        );
+
+      });
+
+
+      if (button) {
+
+        button.classList.add(
+          "active"
+        );
+
+      }
+
+    }
+
 
     /* =========================
        HELPERS
     ========================= */
 
     function formatBalance(value) {
+
       const number =
         Number(value || 0);
+
 
       return number.toLocaleString(
         "en-US"
       );
+
     }
 
+
     function getEquipmentInfo(item) {
+
       return EQUIPMENT[item] || {
+
         name: item,
+
         rarity: "Common",
-        rarityClass: "rarity-common",
+
+        rarityClass:
+          "rarity-common",
+
         maxDurability: 0,
+
         image: ""
+
       };
+
     }
+
 
     function getDurability(item) {
 
       const info =
-        getEquipmentInfo(item.item);
+        getEquipmentInfo(
+          item.item
+        );
 
-      if (item.status === "ready") {
+
+      if (
+        item.status === "ready"
+      ) {
+
         return info.maxDurability;
+
       }
+
 
       if (
         item.status === "expired" ||
         !item.expires_at
       ) {
+
         return 0;
+
       }
 
+
       const expires =
-        new Date(item.expires_at)
-          .getTime();
+        new Date(
+          item.expires_at
+        ).getTime();
+
 
       const remaining =
         Math.max(
@@ -614,21 +919,35 @@
           expires - Date.now()
         );
 
+
       return Math.min(
+
         info.maxDurability,
+
         Math.ceil(
           remaining / DAY_MS
         )
+
       );
+
     }
+
 
     function getStatus(item) {
 
-      if (item.status === "ready") {
+      if (
+        item.status === "ready"
+      ) {
+
         return "READY";
+
       }
 
-      if (item.status === "active") {
+
+      if (
+        item.status === "active"
+      ) {
+
         const expires =
           item.expires_at
             ? new Date(
@@ -636,18 +955,26 @@
               ).getTime()
             : 0;
 
+
         if (
           expires > 0 &&
           expires <= Date.now()
         ) {
+
           return "EXPIRED";
+
         }
 
+
         return "ACTIVE";
+
       }
 
+
       return "EXPIRED";
+
     }
+
 
     function renderEquipment(
       inventory
@@ -658,7 +985,9 @@
           "equipmentGrid"
         );
 
+
       grid.innerHTML = "";
+
 
       if (
         !Array.isArray(inventory) ||
@@ -666,56 +995,85 @@
       ) {
 
         grid.innerHTML = `
+
           <div class="empty-state">
             No mining equipment available.
           </div>
+
         `;
 
         return;
+
       }
+
 
       const sorted =
         [...inventory].sort(
           (a, b) => {
 
             const order = {
+
               stone_axe: 1,
+
               iron_axe: 2,
+
               steel_axe: 3
+
             };
 
+
             return (
+
               (order[a.item] || 99) -
+
               (order[b.item] || 99)
+
             );
+
           }
         );
+
 
       sorted.forEach((item) => {
 
         const info =
-          getEquipmentInfo(item.item);
+          getEquipmentInfo(
+            item.item
+          );
+
 
         const durability =
           getDurability(item);
 
+
         const status =
           getStatus(item);
 
+
         const statusClass =
           status === "READY"
+
             ? "status-ready"
+
             : status === "ACTIVE"
+
               ? "status-active"
+
               : "status-expired";
 
+
         const card =
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
+
 
         card.className =
           "equipment-card";
 
+
         card.innerHTML = `
+
           <img
             class="axe-image"
             src="${info.image}"
@@ -728,41 +1086,63 @@
               ${info.name}
             </h2>
 
-            <div class="rarity ${info.rarityClass}">
+
+            <div
+              class="rarity ${info.rarityClass}"
+            >
               ${info.rarity}
             </div>
+
 
             <div class="durability-label">
               DURABILITY
             </div>
 
+
             <div class="durability-value">
               ${durability} / ${info.maxDurability}
             </div>
 
-            <div class="status ${statusClass}">
+
+            <div
+              class="status ${statusClass}"
+            >
               ${status}
             </div>
 
+
             ${
               status === "READY"
+
                 ? `
+
                   <button
                     class="start-button"
-                    onclick="startMining('${item.id}', this)"
+                    onclick="startMining(
+                      '${item.id}',
+                      this
+                    )"
                   >
                     START MINING
                   </button>
+
                 `
+
                 : ""
+
             }
 
           </div>
+
         `;
 
+
         grid.appendChild(card);
+
       });
+
     }
+
 
     /* =========================
        LOAD PLAYER
@@ -775,32 +1155,46 @@
           "zenticBalance"
         );
 
+
       balanceElement.textContent =
         "Loading...";
+
 
       try {
 
         const response =
-          await fetch("/api/player", {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-            body: JSON.stringify({
-              initData: tg.initData
-            })
-          });
+          await fetch(
+            "/api/player",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                initData:
+                  tg.initData
+              })
+
+            }
+          );
+
 
         const data =
           await response.json();
 
+
         if (!response.ok) {
+
           throw new Error(
             data.error ||
             "Failed to load player"
           );
+
         }
+
 
         const balance =
           Number(
@@ -808,10 +1202,13 @@
             0
           );
 
-        balanceElement.textContent =
-          formatBalance(balance);
 
-        renderEquipment(
+        balanceElement.textContent =
+          formatBalance(
+            balance
+          )
+
+              renderEquipment(
           data.inventory || []
         );
 
@@ -834,6 +1231,7 @@
           error.message;
       }
     }
+
 
     /* =========================
        START MINING
@@ -865,12 +1263,16 @@
             "/api/claim-axe",
             {
               method: "POST",
+
               headers: {
                 "Content-Type":
                   "application/json"
               },
+
               body: JSON.stringify({
-                initData: tg.initData,
+                initData:
+                  tg.initData,
+
                 inventory_id:
                   inventoryId
               })
@@ -902,12 +1304,14 @@
       }
     }
 
+
     /* =========================
        INITIAL LOAD
     ========================= */
 
     loadPlayer();
+
   </script>
 
 </body>
-  </html>
+</html>
