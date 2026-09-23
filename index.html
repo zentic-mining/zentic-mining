@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
   <title>Zentic Mining</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -10,252 +14,396 @@
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
     body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      min-height: 100%;
       font-family: Arial, sans-serif;
-      background: #111827;
+      background: #0b1020;
       color: #ffffff;
-      text-align: center;
+    }
+
+    body {
+      padding: 16px;
     }
 
     .container {
-      max-width: 420px;
+      width: 100%;
+      max-width: 520px;
       margin: 0 auto;
     }
 
-    h1 {
-      margin-bottom: 8px;
-    }
+    /* =========================
+       TOP
+    ========================= */
 
-    .subtitle {
-      color: #9ca3af;
-      margin-bottom: 30px;
-    }
-
-    .balance-card {
-      background: #1f2937;
-      border-radius: 16px;
-      padding: 18px;
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
       margin-bottom: 20px;
     }
 
-    .balance-label {
-      color: #9ca3af;
-      font-size: 14px;
-      margin-bottom: 6px;
+    .brand {
+      text-align: left;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-subtitle {
+      margin-top: 4px;
+      color: #f5b83d;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+    }
+
+    .balance-box {
+      text-align: right;
+      padding-top: 2px;
     }
 
     .balance {
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 17px;
+      line-height: 1.1;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
-    .card {
-      background: #1f2937;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
+    .balance-rate {
+      margin-top: 4px;
+      color: #c7cbd6;
+      font-size: 9px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
-    .card h2 {
-      margin-top: 0;
+    /* =========================
+       WAREHOUSE
+    ========================= */
+
+    .section-title {
+      margin: 8px 0 14px;
+      text-align: left;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
     }
 
-    .price {
-      font-size: 20px;
-      font-weight: bold;
-      margin: 12px 0 18px;
+    .equipment-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
     }
 
-    button {
+    .equipment-card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      background: rgba(20, 27, 46, 0.94);
+      box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.35),
+        inset 0 0 18px rgba(255, 255, 255, 0.025);
+    }
+
+    .axe-image {
       width: 100%;
-      padding: 14px;
+      aspect-ratio: 1 / 0.86;
+      display: block;
+      object-fit: cover;
+      background: #111827;
+    }
+
+    .card-content {
+      padding: 10px;
+    }
+
+    .axe-name {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .rarity {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .rarity-common {
+      color: #8ff0a4;
+      background: rgba(50, 180, 90, 0.16);
+      border: 1px solid rgba(100, 230, 130, 0.35);
+    }
+
+    .rarity-uncommon {
+      color: #59d8ff;
+      background: rgba(30, 160, 230, 0.15);
+      border: 1px solid rgba(60, 200, 255, 0.35);
+    }
+
+    .rarity-epic {
+      color: #dc82ff;
+      background: rgba(160, 60, 255, 0.15);
+      border: 1px solid rgba(200, 100, 255, 0.35);
+    }
+
+    .durability-label {
+      margin-top: 10px;
+      color: #aeb5c5;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .durability-value {
+      margin-top: 3px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .status {
+      margin-top: 8px;
+      padding: 6px 4px;
+      text-align: center;
+      border-radius: 9px;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+    }
+
+    .status-ready {
+      color: #42ee8b;
+      background: rgba(40, 210, 110, 0.1);
+      border: 1px solid rgba(60, 240, 130, 0.22);
+    }
+
+    .status-active {
+      color: #59d8ff;
+      background: rgba(40, 180, 255, 0.1);
+      border: 1px solid rgba(70, 200, 255, 0.22);
+    }
+
+    .status-expired {
+      color: #ff7373;
+      background: rgba(255, 70, 70, 0.08);
+      border: 1px solid rgba(255, 90, 90, 0.2);
+    }
+
+    .start-button {
+      width: 100%;
+      margin-top: 8px;
+      padding: 9px 4px;
       border: 0;
       border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
+      background: linear-gradient(
+        135deg,
+        #19aef5,
+        #2374ff
+      );
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
       cursor: pointer;
-      background: #f59e0b;
-      color: #111827;
-      margin-top: 8px;
     }
 
-    button:disabled {
-      opacity: 0.6;
+    .start-button:disabled {
+      opacity: 0.55;
       cursor: not-allowed;
     }
 
+    /* =========================
+       EMPTY
+    ========================= */
+
+    .empty-state {
+      padding: 35px 20px;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      color: #8e96a8;
+      font-size: 13px;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
     #status {
-      margin-top: 20px;
-      min-height: 24px;
-      color: #d1d5db;
+      min-height: 22px;
+      margin-top: 18px;
+      color: #c8cedb;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* =========================
+       TON CONNECT
+    ========================= */
+
+    #ton-connect {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 390px) {
+      body {
+        padding: 12px;
+      }
+
+      .brand-title {
+        font-size: 21px;
+      }
+
+      .balance {
+        font-size: 15px;
+      }
+
+      .equipment-grid {
+        gap: 8px;
+      }
+
+      .card-content {
+        padding: 8px;
+      }
+
+      .axe-name {
+        font-size: 12px;
+      }
+
+      .rarity {
+        font-size: 7px;
+      }
     }
   </style>
 </head>
 
 <body>
+
   <div class="container">
 
-    <h1>Zentic Mining</h1>
+    <!-- TOP -->
+    <div class="topbar">
 
-    <div class="balance-card">
-      <div class="balance-label">Zentic Balance</div>
-      <div class="balance" id="zenticBalance">
-        Loading...
-      </div>
-    </div>
+      <div class="brand">
+        <h1 class="brand-title">
+          Zentic Mining
+        </h1>
 
-    <div class="subtitle">
-      Upgrade your mining equipment
-    </div>
-    
-<div id="ton-connect"></div>
-
-<div class="card">
-  <h2>Referral Program</h2>
-
-  <div class="price">
-    Earn 10,000 Zentic
-  </div>
-
-  <p>
-    Invite a friend and earn 10,000 Zentic
-    when they start mining.
-  </p>
-
-  <button onclick="inviteFriend()">
-    INVITE FRIENDS
-  </button>
-</div>
-
-  <div class="card">
-  <h2>Mining Bonus</h2>
-
-  <div class="price">
-    +10% Mining Bonus
-  </div>
-
-  <button onclick="showBonusPopup()">
-    ACTIVATE +10% BONUS
-  </button>
-  </div>
-    
-    <div class="card">
-      <h2>Stone Axe</h2>
-
-      <div class="price">
-        50,000 Zentic
+        <div class="brand-subtitle">
+          MINING FUTURE
+        </div>
       </div>
 
-      <button onclick="buyItem('stone_axe', this)">
-        BUY STONE AXE
-      </button>
+      <div class="balance-box">
+        <div
+          class="balance"
+          id="zenticBalance"
+        >
+          Loading...
+        </div>
 
-      <button
-        id="startMiningButton"
-        onclick="startMining()"
-      >
-        START MINING
-      </button>
-    </div>
-
-    <div class="card">
-      <h2>Iron Axe</h2>
-
-      <div class="price">
-        100 Stars
+        <div class="balance-rate">
+          1M Zentic = 1 USDT
+        </div>
       </div>
 
-      <button onclick="buyItem('iron_axe', this)">
-        Buy Iron Axe
-      </button>
     </div>
 
-    <div class="card">
-      <h2>Steel Axe</h2>
-
-      <div class="price">
-        500 Stars
-      </div>
-
-      <button onclick="buyItem('steel_axe', this)">
-        Buy Steel Axe
-      </button>
+    <!-- WAREHOUSE -->
+    <div class="section-title">
+      WAREHOUSE
     </div>
 
-    <button onclick="testMining()">
-      Test Mining
-    </button>
-
-    <button onclick="testRewardAd()">
-      TEST REWARDED AD
-    </button>
+    <div
+      id="equipmentGrid"
+      class="equipment-grid"
+    ></div>
 
     <div id="status"></div>
+
+    <!-- TON CONNECT -->
+    <div id="ton-connect"></div>
 
   </div>
 
   <script>
-const tg = window.Telegram.WebApp;
+    const tg = window.Telegram.WebApp;
 
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl:
-    "https://zentic-mining.vercel.app/tonconnect-manifest.json",
-  buttonRootId: "ton-connect"
-});
+    const DAY_MS =
+      24 * 60 * 60 * 1000;
 
-tonConnectUI.setConnectRequestParameters({
-  state: "loading"
-});
+    const EQUIPMENT = {
+      stone_axe: {
+        name: "Stone Axe",
+        rarity: "Common",
+        rarityClass: "rarity-common",
+        maxDurability: 20,
+        image: "/assets/axes/stone-axe.png"
+      },
 
-fetch("/api/wallet", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    initData: tg.initData,
-    action: "generate-proof"
-  })
-})
-  .then((response) => response.json())
-  .then((data) => {
-    if (!data.success || !data.tonProofPayload) {
-      throw new Error(
-        data.error || "Failed to generate TON proof"
-      );
-    }
+      iron_axe: {
+        name: "Iron Axe",
+        rarity: "Uncommon",
+        rarityClass: "rarity-uncommon",
+        maxDurability: 30,
+        image: "/assets/axes/iron-axe.png"
+      },
+
+      steel_axe: {
+        name: "Steel Axe",
+        rarity: "Epic",
+        rarityClass: "rarity-epic",
+        maxDurability: 45,
+        image: "/assets/axes/steel-axe.png"
+      }
+    };
+
+    /* =========================
+       TELEGRAM
+    ========================= */
+
+    tg.ready();
+    tg.expand();
+
+    /* =========================
+       TON CONNECT
+    ========================= */
+
+    const tonConnectUI =
+      new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl:
+          "https://zentic-mining.vercel.app/tonconnect-manifest.json",
+        buttonRootId: "ton-connect"
+      });
 
     tonConnectUI.setConnectRequestParameters({
-      state: "ready",
-      value: {
-        tonProof: data.tonProofPayload
-      }
+      state: "loading"
     });
-  })
-  .catch((error) => {
-    console.error("TON Proof error:", error);
 
-    tonConnectUI.setConnectRequestParameters(null);
-  });
-
-tonConnectUI.onStatusChange((wallet) => {
-  if (!wallet) {
-    return;
-  }
-
-  console.log(
-    "TON Wallet Connected:",
-    wallet.account.address
-  );
-
-  const tonProof = wallet.connectItems?.tonProof;
-
-  if (
-    tonProof &&
-    "proof" in tonProof
-  ) {
     fetch("/api/wallet", {
       method: "POST",
       headers: {
@@ -263,275 +411,312 @@ tonConnectUI.onStatusChange((wallet) => {
       },
       body: JSON.stringify({
         initData: tg.initData,
-        action: "verify-proof",
-        proof: {
-          address: wallet.account.address,
-          network: wallet.account.chain,
-          publicKey: wallet.account.publicKey,
-          walletStateInit:
-            wallet.account.walletStateInit,
-          ...tonProof.proof
-        }
+        action: "generate-proof"
       })
     })
-      .then((response) => response.json())
+      .then((response) =>
+        response.json()
+      )
       .then((data) => {
-        console.log(
-          "TON Proof Verification:",
-          data
-        );
-      })
-      .catch((error) => {
-        console.error(
-          "TON Proof Verification Error:",
-          error
-        );
-      });
-  }
-});
 
-tg.ready();
-tg.expand();
-
-const AdController = window.Adsgram.init({
-  blockId: "49221",
-  debug: true,
-  debugBannerType: "RewardedVideo"
-});
-    
-function inviteFriend() {
-  const userId = tg.initDataUnsafe?.user?.id;
-
-  if (!userId) {
-    document.getElementById("status").textContent =
-      "Unable to get Telegram user ID.";
-    return;
-  }
-
-  const referralLink =
-    "https://t.me/ZenticMiningBot?startapp=" +
-    userId;
-
-  const shareUrl =
-    "https://t.me/share/url?url=" +
-    encodeURIComponent(referralLink) +
-    "&text=" +
-    encodeURIComponent(
-      "Join Zentic Mining and start earning Zentic!"
-    );
-
-  window.open(shareUrl, "_blank");
-}
-
-    function showBonusPopup() {
-  alert(
-    "Activate your +10% Mining Bonus!\n\n" +
-    "Add this to your Telegram profile bio:\n\n" +
-    "@ZenticMiningBot\n\n" +
-    "After adding it, re-enter Zentic Mining to activate your bonus."
-  );
-    }
-    
-    async function loadPlayer() {
-      const balanceElement =
-        document.getElementById("zenticBalance");
-
-      balanceElement.textContent = "Loading...";
-
-      try {
-        const response = await fetch("/api/player", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            initData: tg.initData
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.error || "Failed to load player"
-          );
-        }
-
-        const balance =
-          Number(data.user?.zentic_balance || 0);
-
-        balanceElement.textContent =
-          balance.toLocaleString("en-US") + " Zentic";
-
-        const activeAxe =
-  data.inventory?.find(
-    (item) =>
-      item.item === "stone_axe" &&
-      item.status === "active"
-  );
-
-if (activeAxe) {
-  document.getElementById("status").textContent =
-    "Stone Axe Rate: " +
-    activeAxe.rate +
-    " Zentic/day";
-}
-
-console.log("Player Result:", data);
-
-return data;
-        
-      } catch (error) {
-        console.error("Load Player Error:", error);
-
-        balanceElement.textContent =
-          "Unable to load";
-
-        document.getElementById("status").textContent =
-          "Failed to load player: " +
-          error.message;
-
-        return null;
-      }
-    }
-
-    async function testRewardAd() {
-  const status =
-    document.getElementById("status");
-
-  status.textContent =
-    "Loading rewarded ad...";
-
-  try {
-    const result =
-      await AdController.show();
-
-    console.log(
-      "AdsGram Result:",
-      result
-    );
-
-    // AdsGram rewarded ad selesai.
-    // Sekarang laporkan completion ke backend.
-    const response =
-      await fetch("/api/daily-boost", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          initData: tg.initData
-        })
-      });
-
-    const data =
-      await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Failed to update Daily Boost"
-      );
-    }
-
-    console.log(
-      "Daily Boost Result:",
-      data
-    );
-
-    if (data.ads_completed >= 3) {
-      status.textContent =
-        "⚡ Daily Boost active for 1 hour!";
-    } else {
-      status.textContent =
-        "Rewarded ad completed! " +
-        data.ads_completed +
-        "/3";
-    }
-
-  } catch (error) {
-    console.error(
-      "AdsGram / Daily Boost Error:",
-      error
-    );
-
-    status.textContent =
-      "Ad failed or closed.";
-  }
-}
-
-    async function testTelegramAuth() {
-      const status =
-        document.getElementById("status");
-
-      status.textContent =
-        "Checking Telegram authentication...";
-
-      try {
-        const response = await fetch(
-          "/api/test-telegram-auth",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              initData: tg.initData
-            })
-          }
-        );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
+        if (
+          !data.success ||
+          !data.tonProofPayload
+        ) {
           throw new Error(
             data.error ||
-            "Telegram authentication failed"
+            "Failed to generate TON proof"
           );
         }
 
-        status.textContent =
-          "Telegram Auth OK. User ID: " +
-          data.telegram_user_id;
+        tonConnectUI.setConnectRequestParameters({
+          state: "ready",
+          value: {
+            tonProof:
+              data.tonProofPayload
+          }
+        });
 
-        console.log(
-          "Telegram Auth Result:",
-          data
+      })
+      .catch(() => {
+
+        tonConnectUI.setConnectRequestParameters(
+          null
         );
 
-      } catch (error) {
-        console.error(error);
+      });
 
-        status.textContent =
-          "Telegram Auth Failed: " +
-          error.message;
-      }
-    }
+    tonConnectUI.onStatusChange(
+      (wallet) => {
 
-    async function buyItem(item, button) {
-      const status =
-        document.getElementById("status");
+        if (!wallet) {
+          return;
+        }
 
-      button.disabled = true;
+        const tonProof =
+          wallet.connectItems?.tonProof;
 
-      status.textContent =
-        "Buying Stone Axe...";
+        if (
+          tonProof &&
+          "proof" in tonProof
+        ) {
 
-      try {
-        const response = await fetch(
-          "/api/buy-axe",
-          {
+          fetch("/api/wallet", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
               initData: tg.initData,
-              item: item
+              action: "verify-proof",
+              proof: {
+                address:
+                  wallet.account.address,
+
+                network:
+                  wallet.account.chain,
+
+                publicKey:
+                  wallet.account.publicKey,
+
+                walletStateInit:
+                  wallet.account
+                    .walletStateInit,
+
+                ...tonProof.proof
+              }
             })
+          }).catch(() => {});
+        }
+      }
+    );
+
+    /* =========================
+       HELPERS
+    ========================= */
+
+    function formatBalance(value) {
+      const number =
+        Number(value || 0);
+
+      return number.toLocaleString(
+        "en-US"
+      );
+    }
+
+    function getEquipmentInfo(item) {
+      return EQUIPMENT[item] || {
+        name: item,
+        rarity: "Common",
+        rarityClass: "rarity-common",
+        maxDurability: 0,
+        image: ""
+      };
+    }
+
+    function getDurability(item) {
+
+      const info =
+        getEquipmentInfo(item.item);
+
+      if (item.status === "ready") {
+        return info.maxDurability;
+      }
+
+      if (
+        item.status === "expired" ||
+        !item.expires_at
+      ) {
+        return 0;
+      }
+
+      const expires =
+        new Date(item.expires_at)
+          .getTime();
+
+      const remaining =
+        Math.max(
+          0,
+          expires - Date.now()
+        );
+
+      return Math.min(
+        info.maxDurability,
+        Math.ceil(
+          remaining / DAY_MS
+        )
+      );
+    }
+
+    function getStatus(item) {
+
+      if (item.status === "ready") {
+        return "READY";
+      }
+
+      if (item.status === "active") {
+        const expires =
+          item.expires_at
+            ? new Date(
+                item.expires_at
+              ).getTime()
+            : 0;
+
+        if (
+          expires > 0 &&
+          expires <= Date.now()
+        ) {
+          return "EXPIRED";
+        }
+
+        return "ACTIVE";
+      }
+
+      return "EXPIRED";
+    }
+
+    function renderEquipment(
+      inventory
+    ) {
+
+      const grid =
+        document.getElementById(
+          "equipmentGrid"
+        );
+
+      grid.innerHTML = "";
+
+      if (
+        !Array.isArray(inventory) ||
+        inventory.length === 0
+      ) {
+
+        grid.innerHTML = `
+          <div class="empty-state">
+            No mining equipment available.
+          </div>
+        `;
+
+        return;
+      }
+
+      const sorted =
+        [...inventory].sort(
+          (a, b) => {
+
+            const order = {
+              stone_axe: 1,
+              iron_axe: 2,
+              steel_axe: 3
+            };
+
+            return (
+              (order[a.item] || 99) -
+              (order[b.item] || 99)
+            );
           }
         );
+
+      sorted.forEach((item) => {
+
+        const info =
+          getEquipmentInfo(item.item);
+
+        const durability =
+          getDurability(item);
+
+        const status =
+          getStatus(item);
+
+        const statusClass =
+          status === "READY"
+            ? "status-ready"
+            : status === "ACTIVE"
+              ? "status-active"
+              : "status-expired";
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "equipment-card";
+
+        card.innerHTML = `
+          <img
+            class="axe-image"
+            src="${info.image}"
+            alt="${info.name}"
+          />
+
+          <div class="card-content">
+
+            <h2 class="axe-name">
+              ${info.name}
+            </h2>
+
+            <div class="rarity ${info.rarityClass}">
+              ${info.rarity}
+            </div>
+
+            <div class="durability-label">
+              DURABILITY
+            </div>
+
+            <div class="durability-value">
+              ${durability} / ${info.maxDurability}
+            </div>
+
+            <div class="status ${statusClass}">
+              ${status}
+            </div>
+
+            ${
+              status === "READY"
+                ? `
+                  <button
+                    class="start-button"
+                    onclick="startMining('${item.id}', this)"
+                  >
+                    START MINING
+                  </button>
+                `
+                : ""
+            }
+
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    /* =========================
+       LOAD PLAYER
+    ========================= */
+
+    async function loadPlayer() {
+
+      const balanceElement =
+        document.getElementById(
+          "zenticBalance"
+        );
+
+      balanceElement.textContent =
+        "Loading...";
+
+      try {
+
+        const response =
+          await fetch("/api/player", {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body: JSON.stringify({
+              initData: tg.initData
+            })
+          });
 
         const data =
           await response.json();
@@ -539,107 +724,84 @@ return data;
         if (!response.ok) {
           throw new Error(
             data.error ||
-            "Failed to buy Axe"
+            "Failed to load player"
           );
         }
 
-        status.textContent =
-          "🪓 Stone Axe purchased successfully!";
+        const balance =
+          Number(
+            data.user?.zentic_balance ||
+            0
+          );
 
-        console.log(
-          "Buy Axe Result:",
-          data
+        balanceElement.textContent =
+          formatBalance(balance);
+
+        renderEquipment(
+          data.inventory || []
         );
 
-        // Refresh balance after successful purchase.
-        await loadPlayer();
-
       } catch (error) {
-        console.error(error);
 
-        status.textContent =
-          "Purchase Failed: " +
+        balanceElement.textContent =
+          "Unable to load";
+
+        document.getElementById(
+          "equipmentGrid"
+        ).innerHTML = `
+          <div class="empty-state">
+            Failed to load warehouse.
+          </div>
+        `;
+
+        document.getElementById(
+          "status"
+        ).textContent =
           error.message;
-
-      } finally {
-        button.disabled = false;
       }
     }
 
-    async function startMining() {
-      const status =
-        document.getElementById("status");
+    /* =========================
+       START MINING
+    ========================= */
 
-      const button =
-        document.getElementById(
-          "startMiningButton"
-        );
+    async function startMining(
+      inventoryId,
+      button
+    ) {
+
+      if (!inventoryId) {
+        return;
+      }
 
       button.disabled = true;
+
+      const status =
+        document.getElementById(
+          "status"
+        );
 
       status.textContent =
         "Starting mining...";
 
       try {
-        // Get latest player inventory
-        const playerResponse =
-          await fetch("/api/player", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              initData: tg.initData
-            })
-          });
 
-        const playerData =
-          await playerResponse.json();
-
-        if (!playerResponse.ok) {
-          throw new Error(
-            playerData.error ||
-            "Failed to load player"
-          );
-        }
-
-        // Refresh displayed balance
-        const balance =
-          Number(
-            playerData.user?.zentic_balance || 0
-          );
-
-        document.getElementById(
-          "zenticBalance"
-        ).textContent =
-          balance.toLocaleString("en-US") +
-          " Zentic";
-
-        const stoneAxe =
-          playerData.inventory.find(
-            (item) =>
-              item.item === "stone_axe" &&
-              item.status === "ready"
-          );
-
-        if (!stoneAxe) {
-          throw new Error(
-            "No Stone Axe ready to start mining"
-          );
-        }
-
-        // Start mining
         const response =
-          await fetch("/api/claim-axe", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              initData: tg.initData,
-              inventory_id: stoneAxe.id
-            })
-          });
+          await fetch(
+            "/api/claim-axe",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+              body: JSON.stringify({
+                initData: tg.initData,
+                inventory_id:
+                  inventoryId
+              })
+            }
+          );
 
         const data =
           await response.json();
@@ -652,15 +814,11 @@ return data;
         }
 
         status.textContent =
-          "⛏️ Mining started successfully!";
+          "Mining started successfully!";
 
-        console.log(
-          "Start Mining Result:",
-          data
-        );
+        await loadPlayer();
 
       } catch (error) {
-        console.error(error);
 
         status.textContent =
           "Start Mining Failed: " +
@@ -670,58 +828,12 @@ return data;
       }
     }
 
-    async function testMining() {
-  const status =
-    document.getElementById("status");
+    /* =========================
+       INITIAL LOAD
+    ========================= */
 
-  status.textContent =
-    "Mining...";
-
-  try {
-    const response =
-      await fetch("/api/mine", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          initData: tg.initData
-        })
-      });
-
-    const data =
-      await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Mining failed"
-      );
-    }
-
-    if (data.profile_bonus_active) {
-      status.textContent =
-        "✅ Mining OK — +10% Bonus ACTIVE";
-    } else {
-      status.textContent =
-        "⚠️ Mining OK — +10% Bonus NOT ACTIVE";
-    }
-
-    console.log(
-      "Mining Result:",
-      data
-    );
-
-  } catch (error) {
-    console.error(error);
-
-    status.textContent =
-      "Mining Failed: " +
-      error.message;
-  }
-}
-    // Load player and balance when the app opens.
     loadPlayer();
   </script>
+
 </body>
   </html>
