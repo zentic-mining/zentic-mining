@@ -283,51 +283,122 @@
     ========================= */
 
     .workshop-title {
-      margin: 8px 0 14px;
-      text-align: left;
-      font-size: 21px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
+  margin: 8px 0 14px;
+  text-align: left;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
 
-    .workshop-card {
-      padding: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 18px;
-      background: rgba(20, 27, 46, 0.94);
-      box-shadow:
-        0 8px 25px rgba(0, 0, 0, 0.35),
-        inset 0 0 18px rgba(255, 255, 255, 0.025);
-    }
+.workshop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
 
-    .workshop-card h2 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 800;
-    }
+.workshop-item {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(20, 27, 46, 0.94);
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.35),
+    inset 0 0 18px rgba(255, 255, 255, 0.025);
+}
 
-    .workshop-card p {
-      margin: 8px 0 0;
-      color: #aeb5c5;
-      font-size: 11px;
-      line-height: 1.5;
-    }
+.workshop-image {
+  width: 100%;
+  aspect-ratio: 1 / 0.86;
+  display: block;
+  object-fit: cover;
+  background: #111827;
+}
 
-    .workshop-button {
-      width: 100%;
-      margin-top: 14px;
-      padding: 11px;
-      border: 0;
-      border-radius: 10px;
-      background: linear-gradient(
-        135deg,
-        #19aef5,
-        #2374ff
-      );
-      color: #ffffff;
-      font-size: 10px;
-      font-weight: 800;
-    }
+.workshop-content {
+  padding: 10px;
+}
+
+.workshop-name {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.workshop-rarity {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.workshop-price {
+  margin-top: 10px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.workshop-durability {
+  margin-top: 4px;
+  color: #aeb5c5;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.workshop-buy {
+  width: 100%;
+  margin-top: 9px;
+  padding: 9px 4px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(
+    135deg,
+    #19aef5,
+    #2374ff
+  );
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.workshop-buy:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 390px) {
+  .workshop-grid {
+    gap: 8px;
+  }
+
+  .workshop-content {
+    padding: 8px;
+  }
+
+  .workshop-name {
+    font-size: 12px;
+  }
+
+  .workshop-price {
+    font-size: 10px;
+  }
+
+  .workshop-rarity {
+    font-size: 7px;
+  }
+
+  .workshop-buy {
+    font-size: 8px;
+  }
+}
+
 
     /* =========================
        REWARDS
@@ -501,39 +572,129 @@
     </div>
 
 
-    <!-- =========================
-         WORKSHOP
-    ========================= -->
+    <!-- WORKSHOP -->
+<div
+  id="workshopPage"
+  class="page"
+>
+  <div class="workshop-title">
+    WORKSHOP
+  </div>
 
-    <div
-      id="workshopPage"
-      class="page"
-    >
+  <div class="workshop-grid">
 
-      <div class="workshop-title">
-        WORKSHOP
-      </div>
+    <div class="workshop-item">
+      <img
+        class="workshop-image"
+        src="/stone-axe.png"
+        alt="Stone Axe"
+      />
 
-      <div class="workshop-card">
+      <div class="workshop-content">
 
-        <h2>
-          Equipment Workshop
+        <h2 class="workshop-name">
+          Stone Axe
         </h2>
 
-        <p>
-          Upgrade and maintain your mining equipment.
-        </p>
+        <div class="workshop-rarity rarity-common">
+          Common
+        </div>
+
+        <div class="workshop-price">
+          50,000 Zentic
+        </div>
+
+        <div class="workshop-durability">
+          20 DAYS
+        </div>
 
         <button
-          class="workshop-button"
+          class="workshop-buy"
           type="button"
+          onclick="buyStoneAxe(this)"
         >
-          WORKSHOP
+          BUY
         </button>
 
       </div>
-
     </div>
+
+
+    <div class="workshop-item">
+      <img
+        class="workshop-image"
+        src="/iron-axe.png"
+        alt="Iron Axe"
+      />
+
+      <div class="workshop-content">
+
+        <h2 class="workshop-name">
+          Iron Axe
+        </h2>
+
+        <div class="workshop-rarity rarity-uncommon">
+          Uncommon
+        </div>
+
+        <div class="workshop-price">
+          100 Telegram Stars
+        </div>
+
+        <div class="workshop-durability">
+          30 DAYS
+        </div>
+
+        <button
+          class="workshop-buy"
+          type="button"
+          onclick="buyStarsAxe('iron_axe', this)"
+        >
+          BUY
+        </button>
+
+      </div>
+    </div>
+
+
+    <div class="workshop-item">
+      <img
+        class="workshop-image"
+        src="/steel-axe.png"
+        alt="Steel Axe"
+      />
+
+      <div class="workshop-content">
+
+        <h2 class="workshop-name">
+          Steel Axe
+        </h2>
+
+        <div class="workshop-rarity rarity-epic">
+          Epic
+        </div>
+
+        <div class="workshop-price">
+          500 Telegram Stars
+        </div>
+
+        <div class="workshop-durability">
+          45 DAYS
+        </div>
+
+        <button
+          class="workshop-buy"
+          type="button"
+          onclick="buyStarsAxe('steel_axe', this)"
+        >
+          BUY
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
     <!-- =========================
@@ -1231,6 +1392,159 @@
           error.message;
       }
     }
+
+    /* BUY STONE AXE */
+async function buyStoneAxe(button) {
+  if (!button) {
+    return;
+  }
+
+  button.disabled = true;
+
+  const status =
+    document.getElementById("status");
+
+  status.textContent =
+    "Purchasing Stone Axe...";
+
+  try {
+    const response =
+      await fetch(
+        "/api/buy-axe",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body: JSON.stringify({
+            initData: tg.initData,
+            item: "stone_axe"
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to buy Stone Axe"
+      );
+    }
+
+    status.textContent =
+      "Stone Axe purchased successfully!";
+
+    await loadPlayer();
+
+  } catch (error) {
+    status.textContent =
+      "Buy Failed: " +
+      error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+    /* BUY AXE WITH TELEGRAM STARS */
+async function buyStarsAxe(item, button) {
+  if (!item || !button) {
+    return;
+  }
+
+  button.disabled = true;
+
+  const status =
+    document.getElementById("status");
+
+  status.textContent =
+    "Creating Telegram Stars invoice...";
+
+  try {
+    const response =
+      await fetch(
+        "/api/create-invoice",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body: JSON.stringify({
+            item: item
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to create invoice"
+      );
+    }
+
+    if (!data.invoice_url) {
+      throw new Error(
+        "Invoice URL is missing"
+      );
+    }
+
+    tg.openInvoice(
+      data.invoice_url,
+      async (result) => {
+
+        if (result === "paid") {
+
+          status.textContent =
+            "Payment successful!";
+
+          await new Promise(
+            (resolve) =>
+              setTimeout(resolve, 1000)
+          );
+
+          await loadPlayer();
+
+        } else if (result === "cancelled") {
+
+          status.textContent =
+            "Payment cancelled.";
+
+        } else if (result === "failed") {
+
+          status.textContent =
+            "Payment failed.";
+
+        } else if (result === "pending") {
+
+          status.textContent =
+            "Payment pending.";
+
+        } else {
+
+          status.textContent =
+            "Payment status: " +
+            result;
+        }
+
+        button.disabled = false;
+      }
+    );
+
+  } catch (error) {
+
+    status.textContent =
+      "Buy Failed: " +
+      error.message;
+
+    button.disabled = false;
+  }
+}
 
 
     /* =========================
