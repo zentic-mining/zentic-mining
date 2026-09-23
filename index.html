@@ -406,6 +406,81 @@
   }
 }
 
+    /* =========================
+       TON WALLET
+========================= */
+
+.wallet-section {
+  margin-top: 18px;
+  padding: 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+
+  background: rgba(20, 27, 46, 0.94);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.35),
+    inset 0 0 18px rgba(255, 255, 255, 0.025);
+}
+
+.wallet-title,
+.withdraw-title {
+  margin-bottom: 10px;
+
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.wallet-section #ton-connect {
+  min-height: 42px;
+}
+
+
+/* =========================
+       WITHDRAW
+========================= */
+
+.withdraw-section {
+  margin-top: 10px;
+  padding: 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+
+  background: rgba(20, 27, 46, 0.94);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.35),
+    inset 0 0 18px rgba(255, 255, 255, 0.025);
+}
+
+.withdraw-button {
+  width: 100%;
+
+  padding: 10px 4px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    #19aef5,
+    #2374ff
+  );
+
+  color: #ffffff;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.withdraw-button:active {
+  transform: scale(0.98);
+}
 
     /* =========================
        REWARDS
@@ -790,12 +865,44 @@
     </div>
 
   </div>
+
+
+  <!-- TON WALLET -->
+  <div class="wallet-section">
+
+    <div class="wallet-title">
+      TON WALLET
+    </div>
+
+    <div id="ton-connect"></div>
+
+  </div>
+
+
+  <!-- WITHDRAW -->
+  <div class="withdraw-section">
+
+    <div class="withdraw-title">
+      WITHDRAW
+    </div>
+
+    <button
+      id="withdrawButton"
+      class="withdraw-button"
+      type="button"
+      onclick="showWithdrawMessage()"
+    >
+      WITHDRAW
+    </button>
+
+  </div>
+
 </div>
 
 
-    <!-- =========================
-         REWARDS
-    ========================= -->
+<!-- =========================
+     REWARDS
+========================= -->
 
     <div
       id="rewardsPage"
@@ -820,9 +927,6 @@
 
     </div>
 
-
-    <!-- TON CONNECT -->
-    <div id="ton-connect"></div>
 
   </div>
 
@@ -1394,13 +1498,28 @@
         `;
 
 
-        grid.appendChild(card);
+                grid.appendChild(card);
 
       });
 
     }
 
 
+    /* WITHDRAW - COMING SOON */
+
+    function showWithdrawMessage() {
+
+      const status =
+        document.getElementById("status");
+
+      if (status) {
+        status.textContent =
+          "Withdraw is not available yet.";
+      }
+
+    }
+
+  
     /* =========================
        LOAD PLAYER
     ========================= */
