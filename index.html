@@ -948,11 +948,34 @@
   </nav>
 
 
-  <script>
-    const tg = window.Telegram.WebApp;
+<script>
+  const tg = window.Telegram.WebApp;
 
-    const DAY_MS =
-      24 * 60 * 60 * 1000;
+  const DAY_MS =
+    24 * 60 * 60 * 1000;
+
+  function inviteFriend() {
+    const userId = tg.initDataUnsafe?.user?.id;
+
+    if (!userId) {
+      alert("Unable to get Telegram user ID.");
+      return;
+    }
+
+    const referralLink =
+      "https://t.me/ZenticMiningBot?startapp=" +
+      userId;
+
+    const shareUrl =
+      "https://t.me/share/url?url=" +
+      encodeURIComponent(referralLink) +
+      "&text=" +
+      encodeURIComponent(
+        "Join Zentic Mining and start earning Zentic!"
+      );
+
+    window.open(shareUrl, "_blank");
+  }
 
 
     const EQUIPMENT = {
