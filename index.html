@@ -614,6 +614,27 @@
   font-weight: 800;
   letter-spacing: 0.5px;
 }
+
+    /* =========================
+   REFERRAL BUTTON
+========================= */
+
+.referral-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #f5b942;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.referral-btn:active {
+  transform: scale(0.98);
+    }
     
     /* =========================
        MOBILE
@@ -911,9 +932,12 @@
     when they start mining.
   </p>
 
-  <button onclick="inviteFriend()">
-    INVITE FRIENDS
-  </button>
+<button
+  class="referral-btn"
+  onclick="inviteFriend()"
+>
+  INVITE FRIENDS
+</button>
 
       </div>
 
