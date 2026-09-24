@@ -26,6 +26,7 @@ try {
 
 let telegram_user_id;
 let profileBonusActive = false;
+let dailyBoostActive = false;
 
 try {
   const telegramAuth = validateTelegramInitData(initData);
@@ -75,8 +76,26 @@ profileBonusActive =
       "Invalid Telegram authentication",
   });
 }
+  
   client = await pool.connect();
     await client.query("BEGIN");
+
+  const boostResult = await client.query(
+  `
+    SELECT boost_expires_at
+    FROM daily_boosts
+    WHERE telegram_user_id = $1
+  `,
+  [telegram_user_id]
+);
+
+if (
+  boostResult.rows.length > 0 &&
+  boostResult.rows[0].boost_expires_at &&
+  new Date(boostResult.rows[0].boost_expires_at) > new Date()
+) {
+  dailyBoostActive = true;
+}
 
     const axesResult = await client.query(
       `
@@ -104,15 +123,18 @@ profileBonusActive =
           CASE item
   WHEN 'stone_axe' THEN
     (2750.0 / 24.0) *
-    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END *
+    CASE WHEN $3 = true THEN 2.00 ELSE 1.00 END 
 
   WHEN 'iron_axe' THEN
     (100000.0 / 24.0) *
-    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END *
+    CASE WHEN $3 = true THEN 2.00 ELSE 1.00 END
 
   WHEN 'steel_axe' THEN
     (300000.0 / 24.0) *
-    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END
+    CASE WHEN $2 = true THEN 1.10 ELSE 1.00 END *
+    CASE WHEN $3 = true THEN 2.00 ELSE 1.00 END
 
   ELSE 0.0
 END
@@ -129,7 +151,8 @@ END
       `,
 [
   telegram_user_id,
-  profileBonusActive
+  profileBonusActive,
+  dailyBoostActive
 ]
 );
     let totalEarned = 0;
