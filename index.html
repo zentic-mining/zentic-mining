@@ -1352,6 +1352,35 @@ function closeBonusPopup() {
   }
 }
 
+function checkMiningBonus() {
+
+  const user =
+    tg.initDataUnsafe?.user;
+
+  if (!user) {
+    return;
+  }
+
+  const profileName =
+    (
+      (user.first_name || "") +
+      " " +
+      (user.last_name || "")
+    ).toLowerCase();
+
+  const bonusTag =
+    "@zenticminingbot";
+
+  const bonusActive =
+    profileName.includes(
+      bonusTag
+    );
+
+  if (!bonusActive) {
+    showBonusPopup();
+  }
+}
+
 
 async function copyMiningBonusTag() {
   const tag = "@zenticminingbot";
@@ -2285,7 +2314,9 @@ async function startLoadingScreen() {
 
   await loadPlayer();
 
-  updateLoading(80);
+checkMiningBonus();
+
+updateLoading(80);
 
   await new Promise((resolve) =>
     setTimeout(resolve, 300)
