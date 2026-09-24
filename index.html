@@ -1090,6 +1090,57 @@
     window.open(shareUrl, "_blank");
   }
 
+    function showBonusPopup() {
+  const popup =
+    document.getElementById("bonusPopup");
+
+  if (popup) {
+    popup.style.display = "flex";
+  }
+}
+
+
+function closeBonusPopup() {
+  const popup =
+    document.getElementById("bonusPopup");
+
+  if (popup) {
+    popup.style.display = "none";
+  }
+
+  const status =
+    document.getElementById("bonusCopyStatus");
+
+  if (status) {
+    status.textContent = "";
+  }
+}
+
+
+async function copyMiningBonusTag() {
+  const tag = "@zenticminingbot";
+
+  try {
+    await navigator.clipboard.writeText(tag);
+
+    const status =
+      document.getElementById("bonusCopyStatus");
+
+    if (status) {
+      status.textContent = "Copied!";
+    }
+
+  } catch (error) {
+    const status =
+      document.getElementById("bonusCopyStatus");
+
+    if (status) {
+      status.textContent =
+        "Copy failed. Please copy it manually.";
+    }
+  }
+}
+
     const EQUIPMENT = {
 
       stone_axe: {
