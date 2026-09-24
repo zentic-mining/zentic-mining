@@ -45,6 +45,53 @@ try {
 
     await client.query("BEGIN");
 
+const existingBoost = await client.query(
+  `
+    SELECT
+      ads_completed,
+      updated_at,
+      boost_expires_at
+    FROM daily_boosts
+    WHERE telegram_user_id = $1
+  `,
+  [telegram_user_id]
+);
+
+if (existingBoost.rows.length > 0) {
+  const boost = existingBoost.rows[0];
+
+  const todayJakarta =
+    new Date().toLocaleDateString(
+      "en-CA",
+      {
+        timeZone: "Asia/Jakarta"
+      }
+    );
+
+  const updatedDateJakarta =
+    new Date(boost.updated_at).toLocaleDateString(
+      "en-CA",
+      {
+        timeZone: "Asia/Jakarta"
+      }
+    );
+
+  if (
+    todayJakarta === updatedDateJakarta &&
+    boost.ads_completed >= 3
+  ) {
+    await client.query("ROLLBACK");
+
+    return res.status(400).json({
+      error:
+        "Daily Boost already used today.",
+      ads_completed: 3,
+      boost_active:
+        boost.boost_expires_at !== null &&
+        new Date(boost.boost_expires_at) > new Date()
+    });
+  }
+}
     /*
       Ambil data Daily Boost user.
       Kalau belum ada, buat record baru.
