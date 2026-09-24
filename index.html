@@ -635,6 +635,27 @@
 .referral-btn:active {
   transform: scale(0.98);
     }
+
+    /* =========================
+   MINING BONUS BUTTON
+========================= */
+
+.mining-bonus-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #f5b942;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.mining-bonus-btn:active {
+  transform: scale(0.98);
+}
     
     /* =========================
        MOBILE
@@ -941,10 +962,74 @@
 
       </div>
 
+      <div class="rewards-card">
+
+  <h2>
+    Mining Bonus
+  </h2>
+
+  <p>
+    Get +10% mining bonus by adding
+    @zenticminingbot to your Telegram profile name.
+  </p>
+
+  <button
+    class="mining-bonus-btn"
+    onclick="showBonusPopup()"
+  >
+    GET 10% MINING BONUS
+  </button>
+
+      </div>
+
     </div>
 
 
   </div>
+
+  <!-- =========================
+     MINING BONUS POPUP
+========================= -->
+
+<div
+  id="bonusPopup"
+  class="bonus-popup"
+  style="display: none;"
+>
+
+  <div class="bonus-popup-content">
+
+    <div class="bonus-popup-title">
+      GET YOUR 10% BONUS MINING
+    </div>
+
+    <p>
+      Add this to your Telegram profile name:
+    </p>
+
+    <button
+      class="bonus-copy-btn"
+      onclick="copyMiningBonusTag()"
+    >
+      @zenticminingbot
+    </button>
+
+    <div
+      id="bonusCopyStatus"
+      class="bonus-copy-status"
+    >
+    </div>
+
+    <button
+      class="bonus-close-btn"
+      onclick="closeBonusPopup()"
+    >
+      CLOSE
+    </button>
+
+  </div>
+
+</div>
 
 
   <!-- =========================
@@ -984,29 +1069,82 @@
     24 * 60 * 60 * 1000;
 
   function inviteFriend() {
-    const userId = tg.initDataUnsafe?.user?.id;
+  const userId = tg.initDataUnsafe?.user?.id;
 
-    if (!userId) {
-      alert("Unable to get Telegram user ID.");
-      return;
-    }
-
-    const referralLink =
-      "https://t.me/ZenticMiningBot?startapp=" +
-      userId;
-
-    const shareUrl =
-      "https://t.me/share/url?url=" +
-      encodeURIComponent(referralLink) +
-      "&text=" +
-      encodeURIComponent(
-        "Join Zentic Mining and start earning Zentic!"
-      );
-
-    window.open(shareUrl, "_blank");
+  if (!userId) {
+    alert("Unable to get Telegram user ID.");
+    return;
   }
 
+  const referralLink =
+    "https://t.me/ZenticMiningBot?startapp=" +
+    userId;
 
+  const shareUrl =
+    "https://t.me/share/url?url=" +
+    encodeURIComponent(referralLink) +
+    "&text=" +
+    encodeURIComponent(
+      "Join Zentic Mining and start earning Zentic!"
+    );
+
+  window.open(shareUrl, "_blank");
+}
+
+
+function showBonusPopup() {
+  const popup =
+    document.getElementById("bonusPopup");
+
+  if (popup) {
+    popup.style.display = "flex";
+  }
+}
+
+
+function closeBonusPopup() {
+  const popup =
+    document.getElementById("bonusPopup");
+
+  if (popup) {
+    popup.style.display = "none";
+  }
+
+  const status =
+    document.getElementById("bonusCopyStatus");
+
+  if (status) {
+    status.textContent = "";
+  }
+}
+
+
+async function copyMiningBonusTag() {
+  const tag = "@zenticminingbot";
+
+  try {
+    await navigator.clipboard.writeText(tag);
+
+    const status =
+      document.getElementById("bonusCopyStatus");
+
+    if (status) {
+      status.textContent = "Copied!";
+    }
+
+  } catch (error) {
+    const status =
+      document.getElementById("bonusCopyStatus");
+
+    if (status) {
+      status.textContent =
+        "Copy failed. Please copy it manually.";
+    }
+  }
+}
+
+
+const EQUIPMENT = {
     const EQUIPMENT = {
 
       stone_axe: {
