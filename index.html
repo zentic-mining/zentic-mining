@@ -1204,10 +1204,11 @@
   </p>
 
   <button
-    class="mining-bonus-btn"
-    onclick="testRewardAd()"
-  >
-    GET DAILY BOOST ⚡
+  id="dailyBoostButton"
+  class="mining-bonus-btn"
+  onclick="testRewardAd()"
+>
+  GET DAILY BOOST ⚡
   </button>
 
       </div>
@@ -1375,9 +1376,22 @@
     );
 
     if (data.ads_completed >= 3) {
-      status.textContent =
-        "⚡ Daily Boost active for 1 hour!";
-    } else {
+
+  status.textContent =
+    "⚡ Daily Boost active for 1 hour!";
+
+  const button =
+    document.getElementById(
+      "dailyBoostButton"
+    );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent =
+      "DAILY BOOST USED TODAY ✓";
+  }
+
+} else {
       status.textContent =
         "Rewarded ad completed! " +
         data.ads_completed +
