@@ -656,6 +656,215 @@
 .mining-bonus-btn:active {
   transform: scale(0.98);
 }
+
+    /* =========================
+   MINING BONUS POPUP
+========================= */
+
+.bonus-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.78);
+
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.bonus-popup-content {
+  position: relative;
+
+  width: 100%;
+  max-width: 380px;
+
+  padding: 28px 20px 20px;
+
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(22, 45, 45, 0.98),
+      rgba(12, 29, 30, 0.98)
+    );
+
+  border: 1px solid rgba(245, 185, 66, 0.28);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.65),
+    inset 0 0 30px rgba(245, 185, 66, 0.025);
+}
+
+.bonus-popup-close {
+  position: absolute;
+
+  top: 14px;
+  right: 14px;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  background: rgba(255, 255, 255, 0.05);
+
+  color: #ffffff;
+
+  font-size: 25px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.bonus-popup-label {
+  margin-top: 6px;
+
+  color: #f5b942;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+.bonus-popup-title {
+  margin-top: 8px;
+
+  color: #ffffff;
+
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.bonus-popup-subtitle {
+  margin-top: 8px;
+
+  color: #aeb5c5;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bonus-name-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-top: 18px;
+  padding: 16px;
+
+  border-radius: 16px;
+
+  background: rgba(5, 20, 21, 0.72);
+
+  border: 1px solid rgba(245, 185, 66, 0.24);
+}
+
+.bonus-name-info {
+  min-width: 0;
+}
+
+.bonus-name-label {
+  color: #f5b942;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+.bonus-name-tag {
+  margin-top: 7px;
+
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.bonus-copy-action {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-width: 88px;
+
+  padding: 11px 13px;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  background: rgba(255, 255, 255, 0.06);
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.bonus-copy-action:active {
+  transform: scale(0.97);
+}
+
+.bonus-copy-icon {
+  font-size: 16px;
+}
+
+.bonus-copy-status {
+  min-height: 18px;
+
+  margin-top: 8px;
+
+  color: #f5b942;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+.bonus-done-btn {
+  width: 100%;
+
+  margin-top: 10px;
+  padding: 15px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: #f5b942;
+
+  color: #111827;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.bonus-done-btn:active {
+  transform: scale(0.98);
+}
     
     /* =========================
        MOBILE
@@ -987,7 +1196,7 @@
 
   </div>
 
-  <!-- =========================
+ <!-- =========================
      MINING BONUS POPUP
 ========================= -->
 
@@ -999,38 +1208,65 @@
 
   <div class="bonus-popup-content">
 
-    <div class="bonus-popup-title">
-      GET YOUR 10% BONUS MINING
+    <button
+      class="bonus-popup-close"
+      onclick="closeBonusPopup()"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+    <div class="bonus-popup-label">
+      BOOST MINING
     </div>
 
-    <p>
-      Add this to your Telegram profile name:
-    </p>
+    <div class="bonus-popup-title">
+      Get your 10% bonus
+    </div>
 
-    <button
-      class="bonus-copy-btn"
-      onclick="copyMiningBonusTag()"
-    >
-      @zenticminingbot
-    </button>
+    <div class="bonus-popup-subtitle">
+      Add this to your Telegram profile name
+    </div>
+
+    <div class="bonus-name-box">
+
+      <div class="bonus-name-info">
+
+        <div class="bonus-name-label">
+          PUT IN YOUR NAME
+        </div>
+
+        <div class="bonus-name-tag">
+          @zenticminingbot
+        </div>
+
+      </div>
+
+      <button
+        class="bonus-copy-action"
+        onclick="copyMiningBonusTag()"
+      >
+        <span class="bonus-copy-icon">▣</span>
+        <span>Copy</span>
+      </button>
+
+    </div>
 
     <div
       id="bonusCopyStatus"
       class="bonus-copy-status"
-    >
-    </div>
+    ></div>
 
     <button
-      class="bonus-close-btn"
+      class="bonus-done-btn"
       onclick="closeBonusPopup()"
     >
-      CLOSE
+      I'VE ADDED IT
     </button>
 
   </div>
 
 </div>
-
 
   <!-- =========================
        BOTTOM NAVIGATION
@@ -1732,7 +1968,9 @@ async function copyMiningBonusTag() {
 
 
         const data =
-          await response.json();
+  await response.json();
+
+console.log("PLAYER DATA:", data);
 
 
         if (!response.ok) {
