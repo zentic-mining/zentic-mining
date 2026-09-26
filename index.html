@@ -2357,6 +2357,129 @@ function showWithdrawMessage() {
 
 }
 
+    function closeWithdrawModal() {
+
+  const modal =
+    document.getElementById("withdrawModal");
+
+  if (modal) {
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+}
+
+
+function setWithdrawMax() {
+
+  const input =
+    document.getElementById("withdrawAmount");
+
+  const balance =
+    Number(window.zenticBalance || 0);
+
+  if (input) {
+    input.value = balance;
+    updateWithdrawAmount();
+  }
+
+}
+
+
+function updateWithdrawAmount() {
+
+  const input =
+    document.getElementById("withdrawAmount");
+
+  const receive =
+    document.getElementById("withdrawReceive");
+
+  const error =
+    document.getElementById("withdrawError");
+
+  const confirmButton =
+    document.getElementById("confirmWithdrawButton");
+
+  const balance =
+    Number(window.zenticBalance || 0);
+
+  const amount =
+    Number(input?.value || 0);
+
+  const minimum =
+    500000;
+
+  if (error) {
+    error.textContent = "";
+  }
+
+  if (receive) {
+    receive.textContent =
+      (amount / 1000000).toFixed(2) +
+      " USDT";
+  }
+
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0
+  ) {
+    if (receive) {
+      receive.textContent = "0.00 USDT";
+    }
+
+    if (confirmButton) {
+      confirmButton.disabled = true;
+    }
+
+    return;
+  }
+
+  if (amount < minimum) {
+
+    if (error) {
+      error.textContent =
+        "Minimum withdrawal is 500,000 ZENTIC.";
+    }
+
+    if (confirmButton) {
+      confirmButton.disabled = true;
+    }
+
+    return;
+  }
+
+  if (amount > balance) {
+
+    if (error) {
+      error.textContent =
+        "Insufficient ZENTIC balance.";
+    }
+
+    if (confirmButton) {
+      confirmButton.disabled = true;
+    }
+
+    return;
+  }
+
+  if (confirmButton) {
+    confirmButton.disabled = false;
+  }
+
+}
+
+    const withdrawAmountInput =
+  document.getElementById("withdrawAmount");
+
+if (withdrawAmountInput) {
+
+  withdrawAmountInput.addEventListener(
+    "input",
+    updateWithdrawAmount
+  );
+
+}
+
   
     /* =========================
        LOAD PLAYER
