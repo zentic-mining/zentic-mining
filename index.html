@@ -2357,6 +2357,89 @@ function showWithdrawMessage() {
 
 }
 
+    async function loadWithdrawInfo() {
+
+  const weeklyQuota =
+    document.getElementById("withdrawWeeklyQuota");
+
+  const available =
+    document.getElementById("withdrawAvailable");
+
+  try {
+
+    const response =
+      await fetch("/api/wallet", {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          action:
+            "withdraw-info",
+
+          initData:     
+            window.Telegram?.WebApp?.initData ||
+            "",
+        }),
+      });
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to load withdrawal info."
+      );
+    }
+
+    const balance =
+      Number(
+        data.balance || 0
+      );
+
+    window.zenticBalance =
+      balance;
+
+    if (available) {
+      available.textContent =
+        formatBalance(balance) +
+        " ZENTIC";
+    }
+
+    const quota =
+      data.weekly_quota || {};
+
+    const used =
+      Number(
+        quota.used || 0
+      );
+
+    const limit =
+      Number(
+        quota.limit || 0
+      );
+
+    if (weeklyQuota) {
+      weeklyQuota.textContent =
+        formatBalance(used) +
+        " / " +
+        formatBalance(limit) +
+        " ZENTIC";
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Withdraw info error:",
+      error
+    );
+
+  }
+
+}
+
     function closeWithdrawModal() {
 
   const modal =
