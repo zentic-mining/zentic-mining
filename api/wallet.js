@@ -750,6 +750,213 @@ export default async function handler(
       });
     }
 
+    /* =====================================================
+   WITHDRAW INFO
+===================================================== */
+
+if (
+  action ===
+  "withdraw-info"
+) {
+
+  const userResult =
+    await pool.query(
+      `
+        SELECT
+          telegram_user_id,
+          zentic_balance,
+          ton_wallet_address
+        FROM users
+        WHERE telegram_user_id = $1
+        LIMIT 1
+      `,
+      [
+        telegram_user_id,
+      ]
+    );
+
+
+  if (
+    userResult.rows.length ===
+    0
+  ) {
+
+    return res.status(404).json({
+      error:
+        "Player not found",
+    });
+  }
+
+
+  const user =
+    userResult.rows[0];
+
+
+  const inventoryResult =
+    await pool.query(
+      `
+        SELECT
+          item
+        FROM user_inventory
+        WHERE telegram_user_id = $1
+          AND status = 'active'
+        ORDER BY id DESC
+        LIMIT 1
+      `,
+      [
+        telegram_user_id,
+      ]
+    );
+
+
+  if (
+    inventoryResult.rows.length ===
+    0
+  ) {
+
+    return res.status(200).json({
+
+      success:
+        true,
+
+      balance:
+        Number(
+          user.zentic_balance || 0
+        ),
+
+      wallet_connected:
+        Boolean(
+          user.ton_wallet_address
+        ),
+
+      axe_type:
+        null,
+
+      weekly_quota: {
+
+        limit:
+          0,
+
+        used:
+          0,
+
+        remaining:
+          0,
+
+      },
+
+    });
+  }
+
+
+  const axeType =
+    inventoryResult.rows[0].item;
+
+
+  const weeklyLimitMap = {
+
+    stone_axe:
+      750000,
+
+    iron_axe:
+      1500000,
+
+    steel_axe:
+      3000000,
+
+  };
+
+
+  const weeklyLimit =
+    weeklyLimitMap[
+      axeType
+    ];
+
+
+  if (!weeklyLimit) {
+
+    return res.status(400).json({
+      error:
+        "Unsupported mining equipment.",
+    });
+  }
+
+
+  const weeklyResult =
+    await pool.query(
+      `
+        SELECT
+          COALESCE(
+            SUM(zentic_amount),
+            0
+          ) AS total
+        FROM withdrawals
+        WHERE telegram_user_id = $1
+          AND axe_type = $2
+          AND status IN (
+            'pending',
+            'processing',
+            'completed'
+          )
+          AND created_at >=
+              NOW() - INTERVAL '7 days'
+      `,
+      [
+        telegram_user_id,
+        axeType,
+      ]
+    );
+
+
+  const weeklyUsed =
+    Number(
+      weeklyResult.rows[0].total ||
+      0
+    );
+
+
+  const remainingQuota =
+    Math.max(
+      0,
+      weeklyLimit -
+      weeklyUsed
+    );
+
+
+  return res.status(200).json({
+
+    success:
+      true,
+
+    balance:
+      Number(
+        user.zentic_balance || 0
+      ),
+
+    wallet_connected:
+      Boolean(
+        user.ton_wallet_address
+      ),
+
+    axe_type:
+      axeType,
+
+    weekly_quota: {
+
+      limit:
+        weeklyLimit,
+
+      used:
+        weeklyUsed,
+
+      remaining:
+        remainingQuota,
+
+    },
+
+  });
+}
+
 
     /* =====================================================
        WITHDRAW
