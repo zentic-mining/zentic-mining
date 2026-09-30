@@ -2553,6 +2553,174 @@ function updateWithdrawAmount() {
 
 }
 
+async function confirmWithdraw() {
+
+  const input =
+    document.getElementById("withdrawAmount");
+
+  const confirmButton =
+    document.getElementById("confirmWithdrawButton");
+
+  const error =
+    document.getElementById("withdrawError");
+
+  const amount =
+    Number(input?.value || 0);
+
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+
+    if (error) {
+      error.textContent =
+        "Enter a valid withdrawal amount.";
+    }
+
+    return;
+  }
+
+  if (amount < 500000) {
+
+    if (error) {
+      error.textContent =
+        "Minimum withdrawal is 500,000 ZENTIC.";
+    }
+
+    return;
+  }
+
+  if (
+    amount >
+    Number(window.zenticBalance || 0)
+  ) {
+
+    if (error) {
+      error.textContent =
+        "Insufficient ZENTIC balance.";
+    }
+
+    return;
+  }
+
+  if (confirmButton) {
+    confirmButton.disabled = true;
+    confirmButton.textContent =
+      "PROCESSING...";
+  }
+
+  if (error) {
+    error.textContent = "";
+  }
+
+  try {
+
+    const response =
+      await fetch("/api/wallet", {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+
+          action:
+            "withdraw",
+
+          amount:
+            amount,
+
+          initData:
+            window.Telegram?.WebApp?.initData ||
+            "",
+
+        }),
+      });
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "Withdrawal failed."
+      );
+    }
+
+    window.zenticBalance =
+      Number(
+        data.remaining_balance || 0
+      );
+
+    const available =
+      document.getElementById(
+        "withdrawAvailable"
+      );
+
+    if (available) {
+
+      available.textContent =
+        formatBalance(
+          window.zenticBalance
+        ) +
+        " ZENTIC";
+    }
+
+    const quota =
+      data.weekly_quota || {};
+
+    const weeklyQuota =
+      document.getElementById(
+        "withdrawWeeklyQuota"
+      );
+
+    if (weeklyQuota) {
+
+      weeklyQuota.textContent =
+        formatBalance(
+          Number(quota.used || 0)
+        ) +
+        " / " +
+        formatBalance(
+          Number(quota.limit || 0)
+        ) +
+        " ZENTIC";
+    }
+
+    if (error) {
+      error.textContent =
+        "Withdrawal submitted successfully.";
+    }
+
+  } catch (err) {
+
+    console.error(
+      "Withdrawal error:",
+      err
+    );
+
+    if (error) {
+      error.textContent =
+        err.message ||
+        "Withdrawal failed.";
+    }
+
+  } finally {
+
+    if (confirmButton) {
+
+      confirmButton.disabled = false;
+
+      confirmButton.textContent =
+        "WITHDRAW";
+    }
+
+    updateWithdrawAmount();
+
+  }
+
+}
+
     const withdrawAmountInput =
   document.getElementById("withdrawAmount");
 
@@ -2565,6 +2733,17 @@ if (withdrawAmountInput) {
 
 }
 
+    const confirmWithdrawButton =
+  document.getElementById("confirmWithdrawButton");
+
+if (confirmWithdrawButton) {
+
+  confirmWithdrawButton.addEventListener(
+    "click",
+    confirmWithdraw
+  );
+
+}
   
     /* =========================
        LOAD PLAYER
